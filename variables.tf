@@ -16,13 +16,15 @@ variable "name_prefix" {
 # from, then point these variables at them.
 
 variable "backend_image_repository" {
-  description = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-backend"
+  description = "Repository of the image built from ./backend."
   type        = string
+  default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-backend"
 }
 
 variable "frontend_image_repository" {
-  description = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-frontend"
+  description = "Repository of the image built from ./frontend."
   type        = string
+  default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-frontend"
 }
 
 variable "backend_image_tag" {
