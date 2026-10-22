@@ -4,9 +4,8 @@ terraform {
 
   required_providers {
     hyperfluid = {
-      # TODO: the provider reference doc does not state the registry address.
-      # Replace with the one given in Hyperfluid's Terraform guide.
-      source = "REPLACE_ME/hyperfluid"
+      source  = "tf-registry.ai.meso.umontpellier.fr/nudibranches-tech/hyperfluid"
+      version = "0.9.0"
     }
   }
 }
