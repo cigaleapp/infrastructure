@@ -39,14 +39,14 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ env.IMAGE_PREFIX }}/backend:latest
+          tags: ${{ env.IMAGE_PREFIX }}-backend:latest
       
       - name: Build frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           push: true
-          tags: ${{ env.IMAGE_PREFIX }}/frontend:latest
+          tags: ${{ env.IMAGE_PREFIX }}-frontend:latest
       
 
           
