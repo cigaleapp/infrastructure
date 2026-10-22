@@ -10,7 +10,7 @@ on:
 jobs:
   build-images:
     name: Build EcoSignal images
-    runs-on: hyperfluid
+    runs-on: ubuntu-latest
 
     env:
       IMAGE_PREFIX: data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal
