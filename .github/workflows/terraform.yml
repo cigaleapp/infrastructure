@@ -44,11 +44,11 @@ jobs:
       - if: github.event.inputs.operation == 'plan'
         name: Terraform Plan
         run: terraform plan -input=false
-          -var "secret_key=${{ secrets.TF_VARS_SECRET_KEY }}"
+          -var "secret_key=${{ secrets.TF_VAR_SECRET_KEY }}"
           -var "first_superuser_password=${{ secrets.TF_VAR_FIRST_SUPERUSER_PASSWORD }}"
 
       - if: github.event.inputs.operation == 'apply'
         name: Terraform Apply
         run: terraform apply -auto-approve
-          -var "secret_key=${{ secrets.TF_VARS_SECRET_KEY }}"
+          -var "secret_key=${{ secrets.TF_VAR_SECRET_KEY }}"
           -var "first_superuser_password=${{ secrets.TF_VAR_FIRST_SUPERUSER_PASSWORD }}"
