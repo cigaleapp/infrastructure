@@ -41,10 +41,10 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Checkout LiuDilongNJ/eco-signal
+      - name: Checkout our fork of LiuDilongNJ/eco-signal
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          repository: LiuDilongNJ/eco-signal
+          repository: cigaleapp/eco-signal
 
       - name: Extract Docker metadata
         id: meta
