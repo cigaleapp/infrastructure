@@ -39,7 +39,9 @@ jobs:
 
       - if: github.event.inputs.operation == 'plan'
         name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -input=false
+        env:
+          TF_LOG: DEBUG
 
       - if: github.event.inputs.operation == 'apply'
         name: Terraform Apply
