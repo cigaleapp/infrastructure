@@ -30,7 +30,7 @@
 
 resource "hyperfluid_container_app" "db_studio" {
   env              = local.env
-  slug             = "db-studio"
+  slug             = "biodimedia-db-studio"
   image_repository = var.db_studio_image_repository
   image_tag        = var.db_studio_image_tag
   resource_tier    = var.db_studio_tier
