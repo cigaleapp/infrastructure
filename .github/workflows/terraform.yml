@@ -30,6 +30,7 @@ jobs:
         uses: nudibranches-tech/setup-hfctl@v1
         with:
           service-account: ${{ secrets.HF_SERVICE_ACCOUNT }}
+          console-url: https://ai.meso.umontpellier.fr 
 
       - name: Setup hyperfluid terraform provider
         run: |
