@@ -1,0 +1,26 @@
+name: Build and publish CORS proxy server image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/cors-proxy-image.yml
+      - .github/actions/build-push-image/**
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Build and push image
+        uses: ./.github/actions/build-push-image
+        with:
+          service: cigale-cors-proxy
+          service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
+          source: repo
+          repository: cigaleapp/cors-proxy
