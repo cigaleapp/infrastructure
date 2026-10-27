@@ -34,7 +34,7 @@ data "hyperfluid_env" "this" {
 # configuration's backend "s3" block needs the bucket to already exist.
 resource "hyperfluid_bucket" "terraform_state" {
   env  = data.hyperfluid_env.this.id
-  name = "infra-terraform-state"
+  name = "biodimedia-terraform-state"
 }
 
 data "hyperfluid_bucket_credentials" "terraform_state" {

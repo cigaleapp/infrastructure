@@ -18,7 +18,7 @@ terraform {
   #   AWS_SECRET_ACCESS_KEY (bootstrap `s3_secret_key` output)
   #   AWS_REGION            (any value; Ceph ignores it, e.g. "default")
   backend "s3" {
-    bucket         = "infra-terraform-state"
+    bucket         = "biodimedia-terraform-state"
     key            = "terraform.tfstate"
     region         = "default"
     use_path_style = true
@@ -27,6 +27,7 @@ terraform {
     skip_credentials_validation = true
     skip_region_validation      = true
     skip_metadata_api_check     = true
+    skip_requesting_account_id  = true
   }
 }
 
