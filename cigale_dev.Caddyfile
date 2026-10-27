@@ -1,0 +1,29 @@
+{
+	filesystem devdeploys s3 {
+		bucket cigale-dev-deployments
+		region {$AWS_DEFAULT_REGION}
+
+		endpoint {$AWS_ENDPOINT_URL}
+		# profile <profile>
+		use_path_style 
+	}
+
+    # log default { 
+    #    level DEBUG
+    # }
+}
+
+http://{$DEPLOYMENT_DOMAIN} {
+    file_server {
+        fs devdeploys
+        browse
+    }
+
+    log {
+        output stdout
+    }
+
+	handle_errors {
+		respond "{err.status_code} {err.status_text}"
+	}
+}
