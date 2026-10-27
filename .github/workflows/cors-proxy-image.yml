@@ -26,4 +26,4 @@ jobs:
           service: cigale-cors-proxy
           service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
           source: repo
-          repository: cigaleapp/cors-proxy
+          repository: cigaleapp/cors-anywhere
