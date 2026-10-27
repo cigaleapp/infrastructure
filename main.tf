@@ -117,7 +117,7 @@ resource "hyperfluid_secret" "sentry_dsn" {
 
 resource "hyperfluid_container_app" "rabbitmq" {
   env              = local.env
-  name             = "${var.name_prefix}-rabbitmq"
+  slug             = "${var.name_prefix}-rabbitmq"
   image_repository = "rabbitmq"
   image_tag        = "3-management"
   resource_tier    = var.rabbitmq_tier
@@ -137,7 +137,7 @@ resource "hyperfluid_container_app" "rabbitmq" {
 
 resource "hyperfluid_container_app" "backend" {
   env              = local.env
-  name             = "${var.name_prefix}-backend"
+  slug             = "${var.name_prefix}-backend"
   image_repository = var.backend_image_repository
   image_tag        = var.backend_image_tag
   resource_tier    = var.backend_tier
@@ -166,7 +166,7 @@ resource "hyperfluid_container_app" "backend" {
 
 resource "hyperfluid_container_app" "worker" {
   env              = local.env
-  name             = "${var.name_prefix}-worker"
+  slug             = "${var.name_prefix}-worker"
   image_repository = var.backend_image_repository
   image_tag        = var.backend_image_tag
   resource_tier    = var.worker_tier
@@ -178,7 +178,7 @@ resource "hyperfluid_container_app" "worker" {
 
 resource "hyperfluid_container_app" "worker_analysis" {
   env              = local.env
-  name             = "${var.name_prefix}-worker-analysis"
+  slug             = "${var.name_prefix}-worker-analysis"
   image_repository = var.backend_image_repository
   image_tag        = var.backend_image_tag
   resource_tier    = var.worker_tier
@@ -197,7 +197,7 @@ resource "hyperfluid_container_app" "worker_analysis" {
 
 resource "hyperfluid_container_app" "frontend" {
   env              = local.env
-  name             = "${var.name_prefix}-frontend"
+  slug             = "${var.name_prefix}-frontend"
   image_repository = var.frontend_image_repository
   image_tag        = var.frontend_image_tag
   resource_tier    = var.frontend_tier

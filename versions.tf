@@ -5,7 +5,7 @@ terraform {
   required_providers {
     hyperfluid = {
       source  = "tf-registry.ai.meso.umontpellier.fr/nudibranches-tech/hyperfluid"
-      version = "0.9.0"
+      version = "0.10.0"
     }
   }
 }
