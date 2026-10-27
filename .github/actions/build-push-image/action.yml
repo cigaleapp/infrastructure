@@ -37,7 +37,7 @@ inputs:
   context:
     description: Build context path, relative to the workspace root
     required: false
-    default: .
+    default: ""
   dockerfile:
     description: >-
       Path to the Dockerfile, relative to the build context. When source is
@@ -106,7 +106,7 @@ runs:
     - name: Build and push image
       uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
       with:
-        context: image-source/${{ inputs.context }}
+        context: ./image-source/${{ inputs.context }}
         file: ${{ inputs.dockerfile }}
         push: true
         tags: ${{ steps.meta.outputs.tags }}
