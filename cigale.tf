@@ -84,7 +84,7 @@ resource "hyperfluid_container_app" "cigale_app" {
   image_tag        = var.cigale_app_image_tag
   resource_tier    = var.cigale_app_tier
   replicas         = var.cigale_app_replicas
-  enabled          = var.apps_enabled
+  enabled          = true
 
   ports = [
     { name = "http", port = 80, protocol = "HTTP", primary = true },
