@@ -1,6 +1,6 @@
 terraform {
   # >= 1.11 is required: hyperfluid_secret.value is a write-only argument.
-  required_version = ">= 1.11"
+  required_version = ">= 1.16.6"
 
   required_providers {
     hyperfluid = {
