@@ -3,5 +3,5 @@
 variable "env_name" {
   description = "Name (slug) of the existing Hyperfluid environment to deploy into."
   type        = string
-  default     = "terraforma"
+  default     = "biodimedia"
 }
