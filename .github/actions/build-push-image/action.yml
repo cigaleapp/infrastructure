@@ -56,6 +56,12 @@ inputs:
       type=ref,event=tag
       type=sha,prefix=sha-
       type=raw,value=latest,enable={{is_default_branch}}
+  ghcr:
+    description: >-
+      Whether to also push the image to ghcr.io of the current repository
+      (ghcr.io/<owner>/<repo>/<service>).
+    required: false
+    default: "true"
 
 runs:
   using: composite
@@ -78,6 +84,14 @@ runs:
         username: ${{ env.DOCKER_USERNAME }}
         password: ${{ env.DOCKER_PASSWORD }}
 
+    - name: Log in to ghcr.io
+      if: ${{ inputs.ghcr == 'true' }}
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+
     - name: Clone repository
       if: ${{ inputs.source == 'repo' }}
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -95,12 +109,32 @@ runs:
         ${{ inputs.dockerfile-content }}
         DOCKERFILE_EOF
 
+    - name: Compute image names
+      id: images
+      shell: bash
+      env:
+        GHCR: ${{ inputs.ghcr }}
+        REPO: ${{ github.repository }}
+        SERVICE: ${{ inputs.service }}
+        REGISTRY: ${{ inputs.registry }}
+      run: |
+        images="${REGISTRY}/default/terraforma-biodimedia/${SERVICE}"
+        if [ "$GHCR" = "true" ]; then
+          images="$images
+          ghcr.io/$(echo "$REPO" | tr '[:upper:]' '[:lower:]')/${SERVICE}"
+        fi
+        {
+          echo "images<<EOF"
+          echo "$images"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+
     - name: Extract Docker metadata
       id: meta
       uses: docker/metadata-action@8e671d84a3bd81afdfc4fdbb96a42b07c2a80934
       with:
         context: git:image-source
-        images: ${{ inputs.registry }}/default/terraforma-biodimedia/${{ inputs.service }}
+        images: ${{ steps.images.outputs.images }}
         tags: ${{ inputs.tags }}
 
     - run: ls -la image-source/${{ inputs.context }}
