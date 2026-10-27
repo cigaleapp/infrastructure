@@ -35,7 +35,7 @@ jobs:
           echo "DOCKER_PASSWORD=$(jq -r '.client_secret' <<< "$SA_JSON")" >> $GITHUB_ENV
 
       - name: Log in to registry
-        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ env.DOCKER_USERNAME }}
