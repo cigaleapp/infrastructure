@@ -1,0 +1,114 @@
+name: Build and push Docker image
+description: >-
+  Builds a Docker image from a cloned repository or an inline Dockerfile,
+  tags it, and pushes it to a container registry.
+
+inputs:
+  service:
+    description: >-
+      Service name used to build the image name. The full image name is
+      <registry>/default/terraforma-biodimedia/<service> (e.g.
+      service "ecosignal-backend" ->
+      data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-backend).
+    required: true
+  registry:
+    description: Container registry to log in to and push to
+    required: false
+    default: data-terra.rg.ai.meso.umontpellier.fr
+  service-account-json:
+    description: Hyperfluid service account JSON (with client_id and client_secret) used for registry authentication
+    required: true
+  source:
+    description: >-
+      Where the Dockerfile comes from. "repo" clones a repository and builds
+      from its Dockerfile; "inline" writes a Dockerfile from the
+      dockerfile-content input (no repository is cloned).
+    required: true
+  repository:
+    description: >-
+      Repository to clone when source is "repo". Defaults to the current
+      repository when omitted.
+    required: false
+  ref:
+    description: >-
+      Branch, tag, or commit to build from when source is "repo". Defaults to
+      the repository's default branch when omitted.
+    required: false
+  context:
+    description: Build context path, relative to the workspace root
+    required: false
+    default: .
+  dockerfile:
+    description: >-
+      Path to the Dockerfile, relative to the build context. When source is
+      "inline" the file is written at this path in the workspace root, so the
+      context should be ".".
+    required: false
+    default: Dockerfile
+  dockerfile-content:
+    description: Dockerfile content to write when source is "inline"
+    required: false
+  tags:
+    description: Tags passed to docker/metadata-action
+    required: false
+    default: |
+      type=ref,event=branch
+      type=ref,event=tag
+      type=sha,prefix=sha-
+      type=raw,value=latest,enable={{is_default_branch}}
+
+runs:
+  using: composite
+  env:
+    IMAGE_PREFIX: default/terraforma-biodimedia
+  steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+    - name: Get docker creds from service account json file
+      shell: bash
+      env:
+        SA_JSON: ${{ inputs.service-account-json }}
+      run: |
+        echo "DOCKER_USERNAME=$(jq -r '.client_id' <<< "$SA_JSON")" >> "$GITHUB_ENV"
+        echo "DOCKER_PASSWORD=$(jq -r '.client_secret' <<< "$SA_JSON")" >> "$GITHUB_ENV"
+
+    - name: Log in to registry
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ env.DOCKER_USERNAME }}
+        password: ${{ env.DOCKER_PASSWORD }}
+
+    - name: Clone repository
+      if: ${{ inputs.source == 'repo' }}
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        repository: ${{ inputs.repository }}
+        ref: ${{ inputs.ref }}
+
+    - name: Write inline Dockerfile
+      if: ${{ inputs.source == 'inline' }}
+      shell: bash
+      run: |
+        cat > "${{ inputs.dockerfile }}" <<'DOCKERFILE_EOF'
+        ${{ inputs.dockerfile-content }}
+        DOCKERFILE_EOF
+
+    - name: Extract Docker metadata
+      id: meta
+      uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
+      with:
+        images: ${{ inputs.registry }}/${{ env.IMAGE_PREFIX }}/${{ inputs.service }}
+        tags: ${{ inputs.tags }}
+
+    - name: Build and push image
+      uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+      with:
+        context: ${{ inputs.context }}
+        file: ${{ inputs.dockerfile }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
