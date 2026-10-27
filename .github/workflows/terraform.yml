@@ -30,19 +30,27 @@ jobs:
         uses: nudibranches-tech/setup-hfctl@v1
         with:
           service-account: ${{ secrets.HF_SERVICE_ACCOUNT }}
-          console-url: https://ai.meso.umontpellier.fr 
+          console-url: https://ai.meso.umontpellier.fr
 
       - name: Setup hyperfluid terraform provider
         run: |
           terraform init
           hfctl tf auth
 
+      - name: Setup terraform.tfvars
+        run: |
+          cp terraform.tfvars.example terraform.tfvars
+
       - if: github.event.inputs.operation == 'plan'
         name: Terraform Plan
         run: terraform plan -input=false
+          -var "secret_key=${{ secrets.TF_VARS_SECRET_KEY }}"
+          -var "first_superuser_password=${{ secrets.TF_VARS_FIRST_SUPERUSER_PASSWORD }}"
         env:
           TF_LOG: DEBUG
 
       - if: github.event.inputs.operation == 'apply'
         name: Terraform Apply
         run: terraform apply -auto-approve
+          -var "secret_key=${{ secrets.TF_VARS_SECRET_KEY }}"
+          -var "first_superuser_password=${{ secrets.TF_VARS_FIRST_SUPERUSER_PASSWORD }}"

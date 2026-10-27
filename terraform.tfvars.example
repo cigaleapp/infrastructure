@@ -1,7 +1,7 @@
 env_name = "default"
 
-backend_image_repository  = "registry.example.com/ecosignal-backend"
-frontend_image_repository = "registry.example.com/ecosignal-frontend"
+# backend_image_repository  = "registry.example.com/ecosignal-backend"
+# frontend_image_repository = "registry.example.com/ecosignal-frontend"
 
 # Pass secrets via the environment instead of committing them:
 #   export TF_VAR_secret_key=...
