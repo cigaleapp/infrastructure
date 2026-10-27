@@ -15,19 +15,19 @@ on:
 jobs:
   terraform-apply:
     runs-on: ubuntu-latest
-    name: Apply
+    name: ${{ github.event.inputs.operation == 'plan' && 'Plan' || 'Apply' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v4
         with:
-          terraform_version: 1.7.6
+          terraform_version: 1.16.6
 
       - name: Set up hfctl
-        uses: nudibranches-tech/setup-hfctl@v1.0.0
+        uses: nudibranches-tech/setup-hfctl@v1
         with:
           service-account: ${{ secrets.HF_SERVICE_ACCOUNT }}
 
