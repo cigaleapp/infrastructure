@@ -103,6 +103,9 @@ runs:
         images: ${{ inputs.registry }}/default/terraforma-biodimedia/${{ inputs.service }}
         tags: ${{ inputs.tags }}
 
+    - run: ls -la image-source/${{ inputs.context }}
+      shell: bash
+
     - name: Build and push image
       uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
       with:
