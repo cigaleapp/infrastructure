@@ -1,8 +1,8 @@
 name: Terraform
 
 on:
-  push: 
-    paths: 
+  push:
+    paths:
       - '**/*.tf'
       - .terraform.lock.hcl
       - .github/workflows/terraform.yml
@@ -21,10 +21,10 @@ env:
   OPERATION: ${{ github.event_name == 'push' && 'plan' || github.event.inputs.operation }}
 
 jobs:
-  terraform-apply:
+  operation:
     runs-on: ubuntu-latest
 
-    name: ${{ github.env.OPERATION == 'plan' && 'Plan' || 'Apply' }}
+    name: ${{ github.event_name == 'push' && 'Plan' || github.event.inputs.operation == 'plan' && 'Plan' || 'Apply' }}
 
     steps:
       - name: Checkout repository
@@ -50,13 +50,13 @@ jobs:
         run: |
           cp terraform.tfvars.example terraform.tfvars
 
-      - if: github.env.OPERATION == 'plan'
+      - if: env.OPERATION == 'plan'
         name: Terraform Plan
         run: terraform plan -input=false
           -var "secret_key=${{ secrets.TF_VAR_SECRET_KEY }}"
           -var "first_superuser_password=${{ secrets.TF_VAR_FIRST_SUPERUSER_PASSWORD }}"
 
-      - if: github.env.OPERATION == 'apply'
+      - if: env.OPERATION == 'apply'
         name: Terraform Apply
         run: terraform apply -auto-approve
           -var "secret_key=${{ secrets.TF_VAR_SECRET_KEY }}"
