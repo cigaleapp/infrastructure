@@ -1,0 +1,45 @@
+name: Terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'What to do: plan (shows the planned changes) or apply (applies the changes)'
+        type: choice
+        required: true
+        default: plan
+        options:
+          - plan
+          - apply
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    name: Apply
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.6
+
+      - name: Set up hfctl
+        uses: nudibranches-tech/setup-hfctl@v1.0.0
+        with:
+          service-account: ${{ secrets.HF_SERVICE_ACCOUNT }}
+
+      - name: Setup hyperfluid terraform provider
+        run: |
+          terraform init
+          hfctl tf auth
+
+      - if: github.event.inputs.operation == 'plan'
+        name: Terraform Plan
+        run: terraform plan
+
+      - if: github.event.inputs.operation == 'apply'
+        name: Terraform Apply
+        run: terraform apply -auto-approve
