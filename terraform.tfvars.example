@@ -7,3 +7,13 @@ env_name = "default"
 #   export TF_VAR_secret_key=...
 #   export TF_VAR_first_superuser_password=...
 #   export TF_VAR_sentry_dsn=...   # optional
+
+# Remote state (S3 backend, see `versions.tf`):
+# The state bucket is provisioned once via the `bootstrap/` configuration.
+# Export the bootstrap outputs before running terraform locally:
+#   export AWS_ENDPOINT_URL=<bootstrap output s3_endpoint>
+#   export AWS_ACCESS_KEY_ID=<bootstrap output s3_access_key>
+#   export AWS_SECRET_ACCESS_KEY=<bootstrap output s3_secret_key>
+#   export AWS_REGION=default
+# CI reads the same values from the TF_S3_ENDPOINT / TF_S3_ACCESS_KEY /
+# TF_S3_SECRET_KEY GitHub secrets.
