@@ -87,13 +87,18 @@ resource "hyperfluid_managed_postgresql_user" "geo_db_user" {
 # Since engine = "postgis" doesn't work yet, see https://discord.com/channels/1190655595724951592/1565079308744134666
 
 # Terraform provider doesnt have persistent volumes yet
+# so we just get the existing app
 # resource "hyperfluid_container_app" "ecosignal_db_postgis" {
 #   env = local.env
 #   slug = "${var.name_prefix}-db-postgis"
 #   image_repository = "imresamu/postgis"
 #   image_tag = "17-3.5"
-  
 # }
+
+data "hyperfluid_container_app" "ecosignal_db_postgis" {
+  env  = local.env
+  slug = "${var.name_prefix}-db-postgis"
+}
 
 # ---------------------------------------------------------------------------
 # Redis-compatible cache (refresh sessions live only here)
@@ -153,6 +158,7 @@ locals {
   # See https://data-terra.ai.meso.umontpellier.fr/secret-manager/secrets?path=biodimedia%2Fdbaas%2Fpostgres%2Fecosignal-db%2Fuser%2Fecosignal
   secret_path_prefix_db     = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.db.slug}/user/${hyperfluid_managed_postgresql_user.db_user.username}"
   secret_path_prefix_geo_db = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.geo_db.slug}/user/${hyperfluid_managed_postgresql_user.geo_db_user.username}"
+
 }
 
 resource "hyperfluid_container_app" "backend" {
@@ -178,12 +184,17 @@ resource "hyperfluid_container_app" "backend" {
     { name = "FIRST_SUPERUSER", value = "admin" },
     { name = "FIRST_SUPERUSER_PASSWORD", secret = "${var.env_name}/${var.secret_path_first_superuser_password}" },
     # get host part from hyperfluid_managed_postgresql.db.write_endpoint (strip https:// and port)
-    { name = "POSTGRES_SERVER", secret = "${local.secret_path_prefix_db}/internal-host" },
-    # get port part
-    { name = "POSTGRES_PORT", secret = "${local.secret_path_prefix_db}/internal-port" },
-    { name = "POSTGRES_DB", secret = "${local.secret_path_prefix_db}/database" },
-    { name = "POSTGRES_USER", secret = "${local.secret_path_prefix_db}/username" },
-    { name = "POSTGRES_PASSWORD", secret = "${local.secret_path_prefix_db}/password" },
+    # { name = "POSTGRES_SERVER", secret = "${local.secret_path_prefix_db}/internal-host" },
+    # # get port part
+    # { name = "POSTGRES_PORT", secret = "${local.secret_path_prefix_db}/internal-port" },
+    # { name = "POSTGRES_DB", secret = "${local.secret_path_prefix_db}/database" },
+    # { name = "POSTGRES_USER", secret = "${local.secret_path_prefix_db}/username" },
+    # { name = "POSTGRES_PASSWORD", secret = "${local.secret_path_prefix_db}/password" },
+    { name = "POSTGRES_SERVER", value = "ca-${data.hyperfluid_container_app.ecosignal_db_postgis.slug}" },
+    { name = "POSTGRES_PORT", value = "5432" },
+    { name = "POSTGRES_DB", value = "ecosignal" },
+    { name = "POSTGRES_USER", value = "postgres" },
+    { name = "POSTGRES_PASSWORD", value = "postgres" },
     { name = "SENTRY_DSN", value = var.sentry_dsn },
     { name = "REDIS_HOST", value = hyperfluid_key_value_cache.redis.host },
     { name = "REDIS_PORT", value = hyperfluid_key_value_cache.redis.port },
@@ -192,14 +203,20 @@ resource "hyperfluid_container_app" "backend" {
     { name = "REDIS_USER", secret = "${var.env_name}/hf-key-value-cache/${hyperfluid_key_value_cache.redis.slug}/username" },
     # TODO: get rabbitmq's env_vars from the app, not hardcoded
     { name = "RABBITMQ_HOST", value = "ca-${hyperfluid_container_app.rabbitmq.slug}" },
+    { name = "RABBITMQ_PORT", value = "5672" },
     { name = "RABBITMQ_USER", value = "ecosignal" },
     { name = "RABBITMQ_PASSWORD", value = "ecosignal" },
     { name = "RABBITMQ_VHOST", value = "/" },
-    { name = "GEO_DB_SERVER", secret = "${local.secret_path_prefix_geo_db}/internal-host" },
-    { name = "GEO_DB_PORT", secret = "${local.secret_path_prefix_geo_db}/internal-port" },
-    { name = "GEO_DB_DB", secret = "${local.secret_path_prefix_geo_db}/database" },
-    { name = "GEO_DB_USER", secret = "${local.secret_path_prefix_geo_db}/username" },
-    { name = "GEO_DB_PASSWORD", secret = "${local.secret_path_prefix_geo_db}/password" },
+    # { name = "GEO_DB_SERVER", secret = "${local.secret_path_prefix_geo_db}/internal-host" },
+    # { name = "GEO_DB_PORT", secret = "${local.secret_path_prefix_geo_db}/internal-port" },
+    # { name = "GEO_DB_DB", secret = "${local.secret_path_prefix_geo_db}/database" },
+    # { name = "GEO_DB_USER", secret = "${local.secret_path_prefix_geo_db}/username" },
+    # { name = "GEO_DB_PASSWORD", secret = "${local.secret_path_prefix_geo_db}/password" },
+    { name = "GEO_DB_SERVER", value = "ca-${data.hyperfluid_container_app.ecosignal_db_postgis.slug}" },
+    { name = "GEO_DB_PORT", value = "5432" },
+    { name = "GEO_DB_DB", value = "geo_db" },
+    { name = "GEO_DB_USER", value = "postgres" },
+    { name = "GEO_DB_PASSWORD", value = "postgres" },
     # TODO: why?
     { name = "SKIP_PRESTART", value = "false" },
     { name = "MEDIA_S3_MODE", value = "s3" },
@@ -210,19 +227,48 @@ resource "hyperfluid_container_app" "backend" {
     # TODO: get dynamically?
     { name = "S3_REGION", value = "default" },
     { name = "MEDIA_CACHE_TTL", value = "300" },
-    { name = "LOG_LEVEL", value = "debug" }
+    { name = "LOG_LEVEL", value = "DEBUG" }
   ]
 
   ports = [
     { name = "http", port = 8000, protocol = "HTTP", primary = true },
   ]
 
+  command = [
+    "/bin/sh", "-c",
+    replace(
+      <<-EOT
+		exec gunicorn app.main:app
+			-k uvicorn.workers.UvicornWorker
+			--bind 0.0.0.0:8000
+			--workers "$${WEB_CONCURRENCY:-2}"
+			--timeout "$${GUNICORN_TIMEOUT:-120}"
+			--graceful-timeout "$${GUNICORN_GRACEFUL_TIMEOUT:-30}"
+			--keep-alive "$${GUNICORN_KEEPALIVE:-5}"
+			--max-requests "$${GUNICORN_MAX_REQUESTS:-1000}"
+			--max-requests-jitter "$${GUNICORN_MAX_REQUESTS_JITTER:-100}"
+			--config /app/app/core/gunicorn.py
+			--access-logfile -
+			--error-logfile -
+		EOT
+    , "\n", "")
+  ]
+
   # Compose healthcheck is GET /api/v1/health with a 300s start period
   # (migrations + initial data). Make sure the platform probe is equally patient.
-#   health_check_path = "/api/v1/health"
-#   health_check_port = 8000
+  health_check_path = "/api/v1/health"
+  health_check_port = 8000
 
   expose_to_internet = false
+}
+
+# Debug container to test why frontend->backend communication doesnt work
+
+resource "hyperfluid_container_app" "ecosignal_debug" {
+  env              = local.env
+  slug             = "${var.name_prefix}-debug"
+  image_repository = "ghcr.io/cigaleapp/infrastructure/ecosignal-debug"
+  image_tag        = "latest"
 }
 
 # ---------------------------------------------------------------------------

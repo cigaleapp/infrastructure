@@ -93,7 +93,7 @@ variable "expose_databases_to_internet" {
 
 variable "backend_tier" {
   type    = string
-  default = "medium"
+  default = "xlarge"
 }
 
 variable "worker_tier" {

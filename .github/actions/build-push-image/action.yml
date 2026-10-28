@@ -118,12 +118,13 @@ runs:
         SERVICE: ${{ inputs.service }}
         REGISTRY: ${{ inputs.registry }}
       run: |
+        service=$(echo "$SERVICE" | tr '_' '-')
         # Only publish on ghcr.io for now, seems like upload to data terra never finishes
-        # images="${REGISTRY}/default/terraforma-biodimedia/${SERVICE}"
+        # images="${REGISTRY}/default/terraforma-biodimedia/${service}"
         if [ "$GHCR" = "true" ]; then
           # images="$images
-          # ghcr.io/$(echo "$REPO" | tr '[:upper:]' '[:lower:]')/${SERVICE}"
-          images="ghcr.io/$(echo "$REPO" | tr '[:upper:]' '[:lower:]')/${SERVICE}"
+          # ghcr.io/$(echo "$REPO" | tr '[:upper:]' '[:lower:]')/${service}"
+          images="ghcr.io/$(echo "$REPO" | tr '[:upper:]' '[:lower:]')/${service}"
         fi
         {
           echo "images<<EOF"

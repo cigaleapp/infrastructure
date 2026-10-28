@@ -1,0 +1,44 @@
+name: Build EcoSignal debug image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ecosignal-debug-image.yml
+      - .github/actions/build-push-image/**
+
+jobs:
+  build-debug-image:
+    runs-on: ubuntu-latest
+
+    name: Build and push
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout infrastructure repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Build and push debug image
+        uses: ./.github/actions/build-push-image
+        with:
+          service: ecosignal-debug
+          service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
+          source: inline
+          dockerfile-content: |
+            FROM ubuntu:22.04
+            RUN apt-get update && apt-get install -y curl 
+
+            # The container will run a small script that will try contacting http://ca-ecosignal-backend:8000/api/v1/health 
+
+            RUN echo '#!/bin/bash' > /healthcheck.sh && \
+                echo 'set -e' >> /healthcheck.sh && \
+                echo 'echo "Checking backend health..."' >> /healthcheck.sh && \
+                echo 'curl -f http://ca-ecosignal-backend:8000/api/v1/health' >> /healthcheck.sh && \
+                echo 'echo "Backend is healthy!"' >> /healthcheck.sh && \
+                chmod +x /healthcheck.sh
+
+            ENTRYPOINT ["/healthcheck.sh"]
