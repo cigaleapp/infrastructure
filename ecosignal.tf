@@ -82,6 +82,20 @@ resource "hyperfluid_managed_postgresql_user" "geo_db_user" {
 }
 
 # ---------------------------------------------------------------------------
+# Manual PostGIS engine databases for now
+# ---------------------------------------------------------------------------
+# Since engine = "postgis" doesn't work yet, see https://discord.com/channels/1190655595724951592/1565079308744134666
+
+# Terraform provider doesnt have persistent volumes yet
+# resource "hyperfluid_container_app" "ecosignal_db_postgis" {
+#   env = local.env
+#   slug = "${var.name_prefix}-db-postgis"
+#   image_repository = "imresamu/postgis"
+#   image_tag = "17-3.5"
+  
+# }
+
+# ---------------------------------------------------------------------------
 # Redis-compatible cache (refresh sessions live only here)
 # ---------------------------------------------------------------------------
 

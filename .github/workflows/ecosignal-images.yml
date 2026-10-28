@@ -21,6 +21,7 @@ jobs:
         include:
           - service: backend
           - service: frontend
+          - service: geo_db
 
     name: Build ${{ matrix.service }} image
 
