@@ -227,7 +227,11 @@ resource "hyperfluid_container_app" "backend" {
     # TODO: get dynamically?
     { name = "S3_REGION", value = "default" },
     { name = "MEDIA_CACHE_TTL", value = "300" },
-    { name = "LOG_LEVEL", value = "DEBUG" }
+    { name = "LOG_LEVEL", value = "DEBUG" },
+    { name = "DB_POOL_SIZE", value = "10" },
+    { name = "DB_MAX_OVERFLOW", value = "20" },
+    { name = "DB_POOL_TIMEOUT", value = "10" },
+    { name = "DB_POOL_RECYCLE", value = "1800" },
   ]
 
   ports = [
