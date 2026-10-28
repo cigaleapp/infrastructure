@@ -151,5 +151,6 @@ runs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        # makes backend image build very long
+        # cache-from: type=gha
+        # cache-to: type=gha,mode=max
