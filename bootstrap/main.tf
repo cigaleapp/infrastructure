@@ -4,14 +4,14 @@ terraform {
   required_providers {
     hyperfluid = {
       source  = "tf-registry.ai.meso.umontpellier.fr/nudibranches-tech/hyperfluid"
-      version = "0.10.0"
+      version = "0.11.0"
     }
   }
 }
 
 provider "hyperfluid" {}
 
-data "hyperfluid_env" "this" {
+data "hyperfluid_environment" "this" {
   name = "terraforma"
 }
 
@@ -33,12 +33,12 @@ data "hyperfluid_env" "this" {
 # This directory uses the default local backend on purpose: the main
 # configuration's backend "s3" block needs the bucket to already exist.
 resource "hyperfluid_bucket" "terraform_state" {
-  env  = data.hyperfluid_env.this.id
+  env  = data.hyperfluid_environment.this.id
   name = "biodimedia-terraform-state"
 }
 
 data "hyperfluid_bucket_credentials" "terraform_state" {
-  env         = data.hyperfluid_env.this.id
+  env         = data.hyperfluid_environment.this.id
   bucket_name = hyperfluid_bucket.terraform_state.name
 }
 
