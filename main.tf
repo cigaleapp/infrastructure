@@ -5,10 +5,10 @@
 # <deployment>_variables.tf and outputs in <deployment>_outputs.tf.
 # Shared (cross-deployment) variables live in variables.tf.
 
-data "hyperfluid_env" "this" {
+data "hyperfluid_environment" "this" {
   name = var.env_name
 }
 
 locals {
-  env = data.hyperfluid_env.this.id
+  env = data.hyperfluid_environment.this.id
 }
