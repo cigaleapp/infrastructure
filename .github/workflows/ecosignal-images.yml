@@ -20,7 +20,9 @@ jobs:
       matrix:
         include:
           - service: backend
+            restart: ecosignal-backend
           - service: frontend
+            restart: ecosignal-frontend
           - service: geo_db
 
     name: Build ${{ matrix.service }} image
@@ -33,20 +35,9 @@ jobs:
         uses: ./.github/actions/build-push-image
         with:
           service: ecosignal-${{ matrix.service }}
+          restart: ${{ matrix.restart }}
           service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
           source: repo
           repository: cigaleapp/eco-signal
           ref: s3
           context: ${{ matrix.service }}
-
-      - name: Setup hfctl
-        uses: nudibranches-tech/setup-hfctl@v1
-        with:
-          service-account: ${{ secrets.HF_SERVICE_ACCOUNT }}
-          console-url: https://ai.meso.umontpellier.fr
-
-      - if: matrix.service != 'geo_db'
-        name: Restart ${{ matrix.service }} container
-        run: |
-          hfctl config set env biodimedia
-          hfctl apps restart ecosignal-${{ matrix.service }}

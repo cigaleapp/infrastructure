@@ -44,6 +44,7 @@ jobs:
         uses: ./.github/actions/build-push-image
         with:
           service: ecosignal-debug
+          restart: ecosignal-frontend # its a init container for frontend
           service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
           source: inline
           dockerfile-content: |
@@ -56,14 +57,3 @@ jobs:
             RUN chmod +x /healthcheck.sh
 
             ENTRYPOINT ["/healthcheck.sh"]
-
-      - name: Setup hfctl
-        uses: nudibranches-tech/setup-hfctl@v1
-        with:
-          service-account: ${{ secrets.HF_SERVICE_ACCOUNT }}
-          console-url: https://ai.meso.umontpellier.fr
-
-      - name: Restart debug container
-        run: |
-          hfctl config set env biodimedia
-          hfctl apps restart ecosignal-frontend

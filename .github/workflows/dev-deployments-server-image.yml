@@ -24,6 +24,7 @@ jobs:
         uses: ./.github/actions/build-push-image
         with:
           service: dev-deployments-server
+          restart: cigale-dev
           service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
           source: inline
           dockerfile: Dockerfile.caddy

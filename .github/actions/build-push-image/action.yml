@@ -37,7 +37,7 @@ inputs:
   context:
     description: Build context path, relative to the workspace root
     required: false
-    default: ""
+    default: ''
   dockerfile:
     description: >-
       Path to the Dockerfile, relative to the build context. When source is
@@ -61,7 +61,12 @@ inputs:
       Whether to also push the image to ghcr.io of the current repository
       (ghcr.io/<owner>/<repo>/<service>).
     required: false
-    default: "true"
+    default: 'true'
+  restart:
+    description: >-
+      Slug of the hyperfluid container app to restart after the image is pushed. If empty, no container is restarted.
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -154,3 +159,17 @@ runs:
         # makes backend image build very long
         # cache-from: type=gha
         # cache-to: type=gha,mode=max
+
+    - if: inputs.restart
+      name: Setup hfctl
+      uses: nudibranches-tech/setup-hfctl@v1
+      with:
+        service-account: ${{ inputs.service-account-json }}
+        console-url: https://ai.meso.umontpellier.fr
+
+    - if: inputs.restart
+      name: Restart service container
+      shell: bash
+      run: |
+        hfctl config set env biodimedia
+        hfctl apps restart ${{ inputs.restart }}
