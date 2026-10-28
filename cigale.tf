@@ -68,6 +68,11 @@ resource "hyperfluid_bucket" "cigale_dev_files" {
   name = "cigale-dev-files"
 }
 
+data "hyperfluid_bucket_credentials" "cigale_dev_files" {
+  env         = local.env
+  bucket_name = hyperfluid_bucket.cigale_dev_files.name
+}
+
 resource "hyperfluid_bucket" "cigale_beamup_attachments" {
   env  = local.env
   name = "cigale-beamup-attachments"
@@ -112,6 +117,43 @@ resource "hyperfluid_container_app" "cigale_dev" {
   ports = [
     { name = "http", port = 80, protocol = "HTTP", primary = true },
   ]
+
+  file_mounts = [{
+    mount_path = "/etc/caddy/Caddyfile",
+    content    = <<-EOT
+		{
+			filesystem devdeploys s3 {
+				bucket cigale-dev-deployments
+				region default
+
+				endpoint ${data.hyperfluid_bucket_credentials.cigale_dev_files.endpoint}
+				# profile <profile>
+				use_path_style 
+			}
+
+			# log default { 
+			#    level DEBUG
+			# }
+		}
+
+		# TODO: figure out a better way to get the endpoint.
+		# we cant use hyperfluid_container_app.cigale_dev.endpoint because itd be self referential
+		http://cigale-dev-${local.env}-data-terra.ai.meso.umontpellier.fr {
+			file_server {
+				fs devdeploys
+				browse
+			}
+
+			log {
+				output stdout
+			}
+
+			handle_errors {
+				respond "{err.status_code} {err.status_text}"
+			}
+		}
+	EOT
+  }]
 
   expose_to_internet = true
   tags               = ["cigale", "developers", "terraform"]

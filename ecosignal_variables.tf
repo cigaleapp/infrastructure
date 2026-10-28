@@ -4,6 +4,20 @@ variable "name_prefix" {
   default     = "ecosignal"
 }
 
+# ---- Network -------------------------------------------------------------------
+
+variable "cors_origins" {
+  description = "From which origins to allow traffic to the API. Syntax is the same as the Access-Control-Allow-Origin header: a single origin, or a space-separated list of origins, or * to allow all."
+  type        = string
+  default     = "*"
+}
+
+variable "ecosignal_domain" {
+  description = "Domain where the ecosignal frontend can be accessed via Internet"
+  type        = string
+  default     = "ecosignal-frontend-biodimedia-data-terra.ai.meso.umontpellier.fr"
+}
+
 # ---- Images -----------------------------------------------------------------
 # The repo publishes no images (docker-compose.yml builds ./backend and
 # ./frontend locally), so build and push them to a registry Hyperfluid can pull
@@ -12,14 +26,14 @@ variable "name_prefix" {
 variable "backend_image_repository" {
   description = "Repository of the image built from ./backend."
   type        = string
-#   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-backend"
+  #   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-backend"
   default = "ghcr.io/cigaleapp/infrastructure/ecosignal-backend"
 }
 
 variable "frontend_image_repository" {
   description = "Repository of the image built from ./frontend."
   type        = string
-#   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-frontend"
+  #   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-frontend"
   default = "ghcr.io/cigaleapp/infrastructure/ecosignal-frontend"
 }
 
@@ -106,16 +120,16 @@ variable "rabbitmq_tier" {
 
 # ---- Secrets (write-only: never stored in Terraform state) ------------------
 
-variable "secret_key" {
-  description = "Backend SECRET_KEY (JWT signing)."
+variable "secret_path_secret_key" {
+  description = "Path to SECRET_KEY secret, relative to the env's folder (don't include the env prefix)"
   type        = string
-  sensitive   = true
+  default     = "ecosignal/secret-key"
 }
 
-variable "first_superuser_password" {
-  description = "Backend FIRST_SUPERUSER_PASSWORD."
+variable "secret_path_first_superuser_password" {
+  description = "Path to FIRST_SUPERUSER_PASSWORD secret, relative to the env's folder (don't include the env prefix)"
   type        = string
-  sensitive   = true
+  default     = "ecosignal/first-superuser-password"
 }
 
 variable "sentry_dsn" {

@@ -27,6 +27,11 @@ resource "hyperfluid_bucket" "media" {
   name = "${var.name_prefix}-media"
 }
 
+data "hyperfluid_bucket_credentials" "media" {
+  env         = local.env
+  bucket_name = hyperfluid_bucket.media.name
+}
+
 # ---------------------------------------------------------------------------
 # Databases
 # ---------------------------------------------------------------------------
@@ -43,6 +48,11 @@ resource "hyperfluid_managed_postgresql" "db" {
   expose_to_internet = var.expose_databases_to_internet
   description        = "EcoSignal application database (PostGIS)"
   tags               = ["ecosignal", "terraform"]
+}
+
+resource "hyperfluid_managed_postgresql_user" "db_user" {
+  username           = "ecosignal"
+  managed_postgresql = hyperfluid_managed_postgresql.db.id
 }
 
 # NOTE: the compose geo_db image bundles geo_init.sh, which downloads/imports
@@ -64,6 +74,11 @@ resource "hyperfluid_managed_postgresql" "geo_db" {
   tags               = ["ecosignal", "terraform"]
 }
 
+resource "hyperfluid_managed_postgresql_user" "geo_db_user" {
+  username           = "ecosignal"
+  managed_postgresql = hyperfluid_managed_postgresql.geo_db.id
+}
+
 # ---------------------------------------------------------------------------
 # Redis-compatible cache (refresh sessions live only here)
 # ---------------------------------------------------------------------------
@@ -75,36 +90,6 @@ resource "hyperfluid_key_value_cache" "redis" {
   maxmemory_policy = "noeviction" # evicting would silently log users out
   description      = "EcoSignal Redis (refresh sessions, task state)"
   tags             = ["ecosignal", "terraform"]
-}
-
-# ---------------------------------------------------------------------------
-# Secrets (write-only values; not stored in state)
-# ---------------------------------------------------------------------------
-
-resource "hyperfluid_secret" "secret_key" {
-  name             = "${var.name_prefix}-secret-key"
-  secret_type      = "plaintext"
-  value            = var.secret_key
-  value_wo_version = var.secrets_version
-  description      = "EcoSignal backend SECRET_KEY"
-}
-
-resource "hyperfluid_secret" "first_superuser_password" {
-  name             = "${var.name_prefix}-first-superuser-password"
-  secret_type      = "plaintext"
-  value            = var.first_superuser_password
-  value_wo_version = var.secrets_version
-  description      = "EcoSignal backend FIRST_SUPERUSER_PASSWORD"
-}
-
-resource "hyperfluid_secret" "sentry_dsn" {
-  count = var.sentry_dsn == "" ? 0 : 1
-
-  name             = "${var.name_prefix}-sentry-dsn"
-  secret_type      = "plaintext"
-  value            = var.sentry_dsn
-  value_wo_version = var.secrets_version
-  description      = "EcoSignal SENTRY_DSN"
 }
 
 # ---------------------------------------------------------------------------
@@ -121,7 +106,17 @@ resource "hyperfluid_container_app" "rabbitmq" {
   image_repository = "rabbitmq"
   image_tag        = "3-management"
   resource_tier    = var.rabbitmq_tier
-  replicas         = 1
+  autoscaling = {
+    max_replicas = 3
+    min_replicas = 1
+  }
+
+  env_vars = [
+    { name = "RABBITMQ_DEFAULT_USER", value = "ecosignal" },
+    { name = "RABBITMQ_DEFAULT_PASS", value = "ecosignal" },
+    { name = "RABBITMQ_DEFAULT_VHOST", value = "/" },
+    { name = "RABBITMQ_ERLANG_COOKIE", value = "ecosignal-erlang-cookie" }
+  ]
 
   ports = [
     { name = "amqp", port = 5672, protocol = "TCP" },
@@ -141,8 +136,53 @@ resource "hyperfluid_container_app" "backend" {
   image_repository = var.backend_image_repository
   image_tag        = var.backend_image_tag
   resource_tier    = var.backend_tier
-  replicas         = 1
   enabled          = var.app_containers_enabled
+  replicas         = 1
+
+  env_vars = [
+    # TODO: get from hyperfluid_container_app.frontend.endpoint but we have to remove the https:// in front
+    # { name = "DOMAIN", value = "ecosignal-frontend-biodimedia-data-terra.ai.meso.umontpellier.fr" },
+    # FIXME: can't do that cuz it creates a cycle since we need the backend to be up for the frontend to start (otherwise ca-ecosignal-backend is "not found" by nginx)
+    # { name = "DOMAIN", value = provider::netparse::parse_url(hyperfluid_container_app.frontend.endpoint).host },
+    { name = "DOMAIN", value = var.ecosignal_domain },
+    # production | staging | local
+    { name = "ENVIRONMENT", value = "production" },
+    { name = "BACKEND_CORS_ORIGINS", value = var.cors_origins },
+    { name = "SECRET_KEY", secret = "${var.env_name}/${var.secret_path_secret_key}" },
+    { name = "FIRST_SUPERUSER", value = "admin" },
+    { name = "FIRST_SUPERUSER_PASSWORD", secret = "${var.env_name}/${var.secret_path_first_superuser_password}" },
+    { name = "POSTGRES_SERVER", value = provider::netparse::parse_url(hyperfluid_managed_postgresql.db.write_endpoint).host },
+    { name = "POSTGRES_PORT", value = provider::netparse::parse_url(hyperfluid_managed_postgresql.db.write_endpoint).port },
+    { name = "POSTGRES_DB", value = hyperfluid_managed_postgresql.db.database_name },
+    { name = "POSTGRES_USER", value = hyperfluid_managed_postgresql_user.db_user.username },
+    { name = "POSTGRES_PASSWORD", secret = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.db.slug}/user/${hyperfluid_managed_postgresql_user.db_user.username}/password" },
+    { name = "SENTRY_DSN", value = var.sentry_dsn },
+    { name = "REDIS_HOST", value = hyperfluid_key_value_cache.redis.host },
+    { name = "REDIS_PORT", value = hyperfluid_key_value_cache.redis.port },
+    # TODO: check secret path
+    { name = "REDIS_PASSWORD", secret = "${var.env_name}/hf-key-value-cache/${hyperfluid_key_value_cache.redis.slug}/password" },
+    { name = "REDIS_USER", secret = "${var.env_name}/hf-key-value-cache/${hyperfluid_key_value_cache.redis.slug}/username" },
+    # TODO: get rabbitmq's env_vars from the app, not hardcoded
+    { name = "RABBITMQ_HOST", value = "ca-${hyperfluid_container_app.rabbitmq.slug}" },
+    { name = "RABBITMQ_USER", value = "ecosignal" },
+    { name = "RABBITMQ_PASSWORD", value = "ecosignal" },
+    { name = "RABBITMQ_VHOST", value = "/" },
+    { name = "GEO_DB_SERVER", value = provider::netparse::parse_url(hyperfluid_managed_postgresql.geo_db.write_endpoint).host },
+    { name = "GEO_DB_PORT", value = provider::netparse::parse_url(hyperfluid_managed_postgresql.geo_db.write_endpoint).port },
+    { name = "GEO_DB_DB", value = hyperfluid_managed_postgresql.geo_db.database_name },
+    { name = "GEO_DB_USER", value = hyperfluid_managed_postgresql_user.geo_db_user.username },
+    { name = "GEO_DB_PASSWORD", secret = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.geo_db.slug}/user/${hyperfluid_managed_postgresql_user.geo_db_user.username}/password" },
+    # TODO: why?
+    { name = "SKIP_PRESTART", value = "true" },
+    { name = "MEDIA_S3_MODE", value = "s3" },
+    { name = "S3_ENDPOINT", value = data.hyperfluid_bucket_credentials.media.endpoint },
+    { name = "S3_ACCESS_KEY", value = data.hyperfluid_bucket_credentials.media.access_key },
+    { name = "S3_SECRET_KEY", value = data.hyperfluid_bucket_credentials.media.secret_key },
+    { name = "S3_BUCKET", value = data.hyperfluid_bucket_credentials.media.bucket_name },
+    # TODO: get dynamically?
+    { name = "S3_REGION", value = "default" },
+    { name = "MEDIA_CACHE_TTL", value = "300" },
+  ]
 
   ports = [
     { name = "http", port = 8000, protocol = "HTTP", primary = true },
@@ -173,6 +213,13 @@ resource "hyperfluid_container_app" "worker" {
   replicas         = 1
   enabled          = var.app_containers_enabled
 
+  env_vars = concat(
+    hyperfluid_container_app.backend.env_vars,
+    [{ name = "WORKER_QUEUE", value = "interactive" }]
+  )
+
+  command = ["python", "-m", "app.workers.rabbitmq_worker"]
+
   expose_to_internet = false
 }
 
@@ -184,6 +231,13 @@ resource "hyperfluid_container_app" "worker_analysis" {
   resource_tier    = var.worker_tier
   replicas         = 1
   enabled          = var.app_containers_enabled
+
+  env_vars = concat(
+    hyperfluid_container_app.backend.env_vars,
+    [{ name = "WORKER_QUEUE", value = "analysis" }]
+  )
+
+  command = ["python", "-m", "app.workers.rabbitmq_worker"]
 
   expose_to_internet = false
 }
@@ -202,10 +256,15 @@ resource "hyperfluid_container_app" "frontend" {
   image_tag        = var.frontend_image_tag
   resource_tier    = var.frontend_tier
   replicas         = 1
+  depends_on       = [hyperfluid_container_app.backend]
   enabled          = var.app_containers_enabled
 
   ports = [
     { name = "http", port = 80, protocol = "HTTP", primary = true },
+  ]
+
+  env_vars = [
+    { name = "FRONTEND_PORT", value = "80" }
   ]
 
   health_check_path = "/"

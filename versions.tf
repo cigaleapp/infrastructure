@@ -7,6 +7,11 @@ terraform {
       source  = "tf-registry.ai.meso.umontpellier.fr/nudibranches-tech/hyperfluid"
       version = "0.11.0"
     }
+
+    netparse = {
+      source  = "gmeligio/netparse"
+      version = "0.0.4"
+    }
   }
 
   # Remote state on Hyperfluid's S3-compatible object storage.
@@ -29,8 +34,11 @@ terraform {
     skip_metadata_api_check     = true
     skip_requesting_account_id  = true
   }
+
 }
 
 # Credentials: `hfctl auth login --service-account ./service_account.json`
 # then `hfctl tf auth`. Or set HYPERFLUID_CREDENTIALS (e.g. in CI).
 provider "hyperfluid" {}
+
+provider "netparse" {}

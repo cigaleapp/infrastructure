@@ -1,6 +1,29 @@
 # This file is maintained automatically by "terraform init".
 # Manual edits may be lost in future updates.
 
+provider "registry.terraform.io/gmeligio/netparse" {
+  version     = "0.0.4"
+  constraints = "0.0.4"
+  hashes = [
+    "h1:3+cW2V9YbN/poL5ntf0JYtsA4YnXcGjUv9AYohGyNWI=",
+    "zh:13239efc09f5ff01383b446dda3c8df179ad2a1557a7f61985ff0e0e645b7b8a",
+    "zh:16d31a6783915c3b09947c6ce6b99215e8b9f59ffd80ff7f6b4a558228006d52",
+    "zh:248f7b7b55c2ceabdbe3c0e0242dde3b55f0ad746af9e0cd37e22859968c7575",
+    "zh:3f8fd8362e687a31bd753127e29a0f2781c55269eb5362ebd255cf3fa73e18ab",
+    "zh:485fd4df241b6d70c8959637b27c0fcefc4bee19c312756177812908aa9b3e2e",
+    "zh:4de929c74767cdc4f554041f65a447342bb80794899f7e55c37a270bdd6759b4",
+    "zh:54f100a31dd629dbba269b0918abbccf57302a108fd1dac21b147e39f7c8db58",
+    "zh:631f36d4265f32db8ff79dc68e36ad8aecc47a7bb2ebe7f2178568440aad9a3c",
+    "zh:65cc782c620d9064e479f3950e68321c2b5db1d2b0e30a995b2062c45fe51771",
+    "zh:738f4dc249eed2da3671596065409e81f90c9d852e7f1c7b7f30203373e1e27e",
+    "zh:890df766e9b839623b1f0437355032a3c006226a6c200cd911e15ee1a9014e9f",
+    "zh:b3872837215b1cc74a888c53282ac1d595996e01167aa00fa036f2cd24e2afbc",
+    "zh:bd3619d286ccb3a25fbaec09cf8018d409db0f6c8bd28622e238e72bc5aecac2",
+    "zh:bde18bf9a60c83bef29c7864ab1071028bcfaf0dc321feffd67c0c8eb371ad2a",
+    "zh:f2dc2c8262e45964cd267078e8207291a1630fa9c6e6c814ee62e0b1cf0fd30c",
+  ]
+}
+
 provider "tf-registry.ai.meso.umontpellier.fr/nudibranches-tech/hyperfluid" {
   version     = "0.11.0"
   constraints = "0.11.0"

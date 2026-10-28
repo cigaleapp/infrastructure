@@ -60,11 +60,7 @@ jobs:
       - if: env.OPERATION == 'plan'
         name: Terraform Plan
         run: terraform plan -input=false
-          -var "secret_key=${{ secrets.TF_VAR_SECRET_KEY }}"
-          -var "first_superuser_password=${{ secrets.TF_VAR_FIRST_SUPERUSER_PASSWORD }}"
 
       - if: env.OPERATION == 'apply'
         name: Terraform Apply
         run: terraform apply -auto-approve -input=false
-          -var "secret_key=${{ secrets.TF_VAR_SECRET_KEY }}"
-          -var "first_superuser_password=${{ secrets.TF_VAR_FIRST_SUPERUSER_PASSWORD }}"
