@@ -25,7 +25,7 @@ jobs:
       - name: Create debug script
         run: |
           mkdir -p image-source
-          echo <<EOF > image-source/healthcheck.sh
+          cat <<'EOF' > image-source/healthcheck.sh
           #!/bin/bash
           set -e
           echo "Checking backend health..."
