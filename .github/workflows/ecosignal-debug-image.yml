@@ -38,7 +38,6 @@ jobs:
             -H "Content-Type: application/x-www-form-urlencoded" \
             -d "username=admin&password=$ADMINPASS"
           echo "Auth request succeeded!"
-          while true; do sleep 10; done
           EOF
 
       - name: Build and push debug image
@@ -67,4 +66,4 @@ jobs:
       - name: Restart debug container
         run: |
           hfctl config set env biodimedia
-          hfctl apps restart ecosignal-debug
+          hfctl apps restart ecosignal-frontend

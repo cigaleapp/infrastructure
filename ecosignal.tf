@@ -262,21 +262,6 @@ resource "hyperfluid_container_app" "backend" {
   expose_to_internet = false
 }
 
-# Debug container to test why frontend->backend communication doesnt work
-
-resource "hyperfluid_container_app" "ecosignal_debug" {
-  env              = local.env
-  slug             = "${var.name_prefix}-debug"
-  image_repository = "ghcr.io/cigaleapp/infrastructure/ecosignal-debug"
-  image_tag        = "latest"
-  resource_tier    = "nano"
-
-  env_vars = [{
-    name   = "ADMINPASS",
-    secret = "${var.env_name}/ecosignal/first-superuser-password"
-  }]
-}
-
 # ---------------------------------------------------------------------------
 # Workers (same image as the backend)
 # ---------------------------------------------------------------------------
@@ -345,8 +330,16 @@ resource "hyperfluid_container_app" "frontend" {
   ]
 
   env_vars = [
-    { name = "FRONTEND_PORT", value = "80" }
+    { name = "FRONTEND_PORT", value = "80" },
+    # For debug init container
+    { name = "ADMINPASS", secret = "${var.env_name}/ecosignal/first-superuser-password" }
   ]
+
+  init_containers = [{
+    name             = "debug-backend-communication",
+    image_repository = "ghcr.io/cigaleapp/infrastructure/ecosignal-debug",
+    image_tag        = "latest",
+  }]
 
   health_check_path = "/"
   health_check_port = 80
