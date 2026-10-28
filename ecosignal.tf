@@ -20,6 +20,14 @@
 # That is why app_containers_enabled defaults to false.
 
 # ---------------------------------------------------------------------------
+# Buckets
+# ---------------------------------------------------------------------------
+resource "hyperfluid_bucket" "media" {
+  env  = local.env
+  name = "${var.name_prefix}-media"
+}
+
+# ---------------------------------------------------------------------------
 # Databases
 # ---------------------------------------------------------------------------
 
@@ -221,15 +229,15 @@ locals {
 
   # Targets with a single well-known port (or a single primary port).
   links = {
-    backend-db          = { consumer = local.consumers.backend, kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.db.slug }
-    backend-geo         = { consumer = local.consumers.backend, kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.geo_db.slug }
-    backend-cache       = { consumer = local.consumers.backend, kind = "HfKeyValueCache", target = hyperfluid_key_value_cache.redis.slug }
-    worker-db           = { consumer = local.consumers.worker, kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.db.slug }
-    worker-geo          = { consumer = local.consumers.worker, kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.geo_db.slug }
-    worker-cache        = { consumer = local.consumers.worker, kind = "HfKeyValueCache", target = hyperfluid_key_value_cache.redis.slug }
-    analysis-db         = { consumer = local.consumers["worker-analysis"], kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.db.slug }
-    analysis-cache      = { consumer = local.consumers["worker-analysis"], kind = "HfKeyValueCache", target = hyperfluid_key_value_cache.redis.slug }
-    frontend-backend    = { consumer = hyperfluid_container_app.frontend.slug, kind = "ContainerApp", target = hyperfluid_container_app.backend.slug }
+    backend-db       = { consumer = local.consumers.backend, kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.db.slug }
+    backend-geo      = { consumer = local.consumers.backend, kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.geo_db.slug }
+    backend-cache    = { consumer = local.consumers.backend, kind = "HfKeyValueCache", target = hyperfluid_key_value_cache.redis.slug }
+    worker-db        = { consumer = local.consumers.worker, kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.db.slug }
+    worker-geo       = { consumer = local.consumers.worker, kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.geo_db.slug }
+    worker-cache     = { consumer = local.consumers.worker, kind = "HfKeyValueCache", target = hyperfluid_key_value_cache.redis.slug }
+    analysis-db      = { consumer = local.consumers["worker-analysis"], kind = "ManagedPostgreSQL", target = hyperfluid_managed_postgresql.db.slug }
+    analysis-cache   = { consumer = local.consumers["worker-analysis"], kind = "HfKeyValueCache", target = hyperfluid_key_value_cache.redis.slug }
+    frontend-backend = { consumer = hyperfluid_container_app.frontend.slug, kind = "ContainerApp", target = hyperfluid_container_app.backend.slug }
   }
 }
 

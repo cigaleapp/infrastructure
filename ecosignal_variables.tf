@@ -12,23 +12,25 @@ variable "name_prefix" {
 variable "backend_image_repository" {
   description = "Repository of the image built from ./backend."
   type        = string
-  default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-backend"
+#   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-backend"
+  default = "ghcr.io/cigaleapp/infrastructure/ecosignal-backend"
 }
 
 variable "frontend_image_repository" {
   description = "Repository of the image built from ./frontend."
   type        = string
-  default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-frontend"
+#   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-frontend"
+  default = "ghcr.io/cigaleapp/infrastructure/ecosignal-frontend"
 }
 
 variable "backend_image_tag" {
   type    = string
-  default = "latest"
+  default = "s3"
 }
 
 variable "frontend_image_tag" {
   type    = string
-  default = "latest"
+  default = "s3"
 }
 
 variable "app_containers_enabled" {
