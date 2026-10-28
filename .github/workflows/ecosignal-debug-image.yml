@@ -31,6 +31,13 @@ jobs:
           echo "Checking backend health..."
           curl -f http://ca-ecosignal-backend:8000/api/v1/health
           echo "Backend is healthy!"
+          # Try an auth request (form data)
+          curl \
+            -f http://ca-ecosignal-backend:8000/api/v1/auth-tokens \
+            -X POST \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "username=admin&password=wrong"
+          echo "Auth request succeeded!"
           while true; do sleep 10; done
           EOF
 
