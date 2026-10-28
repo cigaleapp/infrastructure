@@ -41,7 +41,7 @@ variable "app_containers_enabled" {
     cannot start correctly.
   EOT
   type        = bool
-  default     = false
+  default     = true
 }
 
 # ---- Databases --------------------------------------------------------------
