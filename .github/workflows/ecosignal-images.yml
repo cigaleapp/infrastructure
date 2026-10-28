@@ -38,3 +38,15 @@ jobs:
           repository: cigaleapp/eco-signal
           ref: s3
           context: ${{ matrix.service }}
+
+      - name: Setup hfctl
+        uses: nudibranches-tech/setup-hfctl@v1
+        with:
+          service-account: ${{ secrets.HF_SERVICE_ACCOUNT }}
+          console-url: https://ai.meso.umontpellier.fr
+
+      - if: matrix.service != 'geo_db'
+        name: Restart ${{ matrix.service }} container
+        run: |
+          hfctl config set env biodimedia
+          hfctl apps restart ecosignal-${{ matrix.service }}
