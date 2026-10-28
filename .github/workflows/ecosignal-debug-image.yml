@@ -41,7 +41,6 @@ jobs:
           while true; do sleep 10; done
           EOF
 
-
       - name: Build and push debug image
         uses: ./.github/actions/build-push-image
         with:
@@ -58,3 +57,14 @@ jobs:
             RUN chmod +x /healthcheck.sh
 
             ENTRYPOINT ["/healthcheck.sh"]
+
+      - name: Setup hfctl
+        uses: nudibranches-tech/setup-hfctl@v1
+        with:
+          service-account: ${{ secrets.HF_SERVICE_ACCOUNT }}
+          console-url: https://ai.meso.umontpellier.fr
+
+      - name: Restart debug container
+        run: |
+          hfctl config set env biodimedia
+          hfctl apps restart ecosignal-debug
