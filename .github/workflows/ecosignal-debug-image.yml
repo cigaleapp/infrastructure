@@ -39,6 +39,7 @@ jobs:
                 echo 'echo "Checking backend health..."' >> /healthcheck.sh && \
                 echo 'curl -f http://ca-ecosignal-backend:8000/api/v1/health' >> /healthcheck.sh && \
                 echo 'echo "Backend is healthy!"' >> /healthcheck.sh && \
+                echo 'while true; do sleep 10; done' >> /healthcheck.sh && \
                 chmod +x /healthcheck.sh
 
             ENTRYPOINT ["/healthcheck.sh"]
