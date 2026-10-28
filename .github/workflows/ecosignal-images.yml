@@ -35,4 +35,5 @@ jobs:
           service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
           source: repo
           repository: cigaleapp/eco-signal
+          ref: s3
           context: ${{ matrix.service }}
