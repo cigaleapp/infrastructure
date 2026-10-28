@@ -64,7 +64,7 @@ inputs:
     default: 'true'
   restart:
     description: >-
-      Slug of the hyperfluid container app to restart after the image is pushed. If empty, no container is restarted.
+      Space-separated list of hyperfluid container apps to restart after the image is pushed. If empty, no container is restarted.
     required: false
     default: ''
 
@@ -168,8 +168,11 @@ runs:
         console-url: https://ai.meso.umontpellier.fr
 
     - if: inputs.restart
-      name: Restart service container
+      name: Restart service container(s)
       shell: bash
       run: |
+        set -xe
         hfctl config set env biodimedia
-        hfctl apps restart ${{ inputs.restart }}
+        for app in ${{ inputs.restart }}; do
+          hfctl apps restart "$app"
+        done
