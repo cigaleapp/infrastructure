@@ -88,8 +88,8 @@ resource "hyperfluid_container_app" "cigale_app" {
   image_repository = var.cigale_app_image_repository
   image_tag        = var.cigale_app_image_tag
   resource_tier    = var.cigale_app_tier
-  replicas         = var.cigale_app_replicas
   enabled          = true
+  autoscaling      = { min_replicas = 1, max_replicas = 3 }
 
   ports = [
     { name = "http", port = 80, protocol = "HTTP", primary = true },
@@ -111,7 +111,7 @@ resource "hyperfluid_container_app" "cigale_dev" {
   image_repository = var.cigale_dev_image_repository
   image_tag        = var.cigale_dev_image_tag
   resource_tier    = var.cigale_dev_tier
-  replicas         = var.cigale_dev_replicas
+  autoscaling      = { min_replicas = 1, max_replicas = 3 }
   enabled          = var.apps_enabled
 
   ports = [
@@ -136,9 +136,7 @@ resource "hyperfluid_container_app" "cigale_dev" {
 			# }
 		}
 
-		# TODO: figure out a better way to get the endpoint.
-		# we cant use hyperfluid_container_app.cigale_dev.endpoint because itd be self referential
-		http://cigale-dev-${local.env}-data-terra.ai.meso.umontpellier.fr {
+		http://${var.cigale_dev_domain} {
 			file_server {
 				fs devdeploys
 				browse
@@ -172,7 +170,7 @@ resource "hyperfluid_container_app" "cigale_beamup" {
   image_repository = var.cigale_beamup_image_repository
   image_tag        = var.cigale_beamup_image_tag
   resource_tier    = var.cigale_beamup_tier
-  replicas         = var.cigale_beamup_replicas
+  autoscaling      = { min_replicas = 1, max_replicas = 3 }
   enabled          = var.apps_enabled
 
   ports = [
@@ -194,7 +192,7 @@ resource "hyperfluid_container_app" "cigale_beamup_smtp" {
   image_repository = var.cigale_beamup_smtp_image_repository
   image_tag        = var.cigale_beamup_smtp_image_tag
   resource_tier    = var.cigale_beamup_smtp_tier
-  replicas         = var.cigale_beamup_smtp_replicas
+  replicas         = 1
   enabled          = var.apps_enabled
 
   ports = [
@@ -216,7 +214,7 @@ resource "hyperfluid_container_app" "cigale_cors_proxy" {
   image_repository = var.cigale_cors_proxy_image_repository
   image_tag        = var.cigale_cors_proxy_image_tag
   resource_tier    = var.cigale_cors_proxy_tier
-  replicas         = var.cigale_cors_proxy_replicas
+  autoscaling      = { min_replicas = 1, max_replicas = 5 }
   enabled          = var.apps_enabled
 
   ports = [
@@ -228,25 +226,28 @@ resource "hyperfluid_container_app" "cigale_cors_proxy" {
 }
 
 # ---------------------------------------------------------------------------
-# cigale-github-actions-runner (self-hosted runner, not internet-facing)
-#   Needs (console): ORG_NAME, RUNNER_NAME, RUNNER_SCOPE, RUNNER_WORKDIR,
-#   ACCESS_TOKEN, LABELS.
-#   NOTE: the provider caps resource_tier at xlarge; the runner needs 4xlarge
-#   (8 CPU / 8Gi) - bump the tier in the console after apply.
+# Github Actions runner (WIP)
 # ---------------------------------------------------------------------------
 
-resource "hyperfluid_container_app" "cigale_github_actions_runner" {
-  env              = local.env
-  slug             = "cigale-github-actions-runner"
-  image_repository = var.cigale_runner_image_repository
-  image_tag        = var.cigale_runner_image_tag
-  resource_tier    = var.cigale_runner_tier
-  replicas         = var.cigale_runner_replicas
-  enabled          = var.apps_enabled
-
-  expose_to_internet = false
-  tags               = ["cigale", "developers", "terraform"]
+data "hyperfluid_virtual_machine_images" "vm_catalog" {
+  env = local.env
 }
+
+locals {
+  ubuntu = data.hyperfluid_virtual_machine_images.vm_catalog.images[0]
+}
+
+resource "hyperfluid_virtual_machine" "cigale_github_actions" {
+  env              = local.env
+  name             = "cigale-github-actions"
+  cpu              = "4"
+  memory           = "16Gi"
+  disk             = "40Gi"
+  image_source_ref = local.ubuntu.image_source_ref
+  image_key        = local.ubuntu.image_key
+  running          = false
+}
+
 
 # ---------------------------------------------------------------------------
 # Service links

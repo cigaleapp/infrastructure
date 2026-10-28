@@ -48,9 +48,16 @@ variable "cigale_app_tier" {
   default = "nano"
 }
 
-variable "cigale_app_replicas" {
-  type    = number
-  default = 1
+variable "cigale_domain" {
+  description = "Domain for the Cigale app, accessible via the Internet"
+  type        = string
+  default     = "cigale-app-biodimedia-data-terra.ai.meso.umontpellier.fr"
+}
+
+variable "cigale_dev_domain" {
+  description = "Domain for the Cigale dev-deployments server, accessible via the Internet"
+  type        = string
+  default     = "cigale-dev-biodimedia-data-terra.ai.meso.umontpellier.fr"
 }
 
 # ---- cigale-dev -------------------------------------------------------------
@@ -70,10 +77,6 @@ variable "cigale_dev_tier" {
   default = "nano"
 }
 
-variable "cigale_dev_replicas" {
-  type    = number
-  default = 3
-}
 
 # ---- cigale-beamup ----------------------------------------------------------
 
@@ -90,11 +93,6 @@ variable "cigale_beamup_image_tag" {
 variable "cigale_beamup_tier" {
   type    = string
   default = "micro"
-}
-
-variable "cigale_beamup_replicas" {
-  type    = number
-  default = 1
 }
 
 # ---- cigale-beamup-smtp -----------------------------------------------------
@@ -114,11 +112,6 @@ variable "cigale_beamup_smtp_tier" {
   default = "nano"
 }
 
-variable "cigale_beamup_smtp_replicas" {
-  type    = number
-  default = 1
-}
-
 # ---- cigale-cors-proxy ------------------------------------------------------
 
 variable "cigale_cors_proxy_image_repository" {
@@ -136,11 +129,6 @@ variable "cigale_cors_proxy_tier" {
   default = "nano"
 }
 
-variable "cigale_cors_proxy_replicas" {
-  type    = number
-  default = 5
-}
-
 # ---- cigale-github-actions-runner -------------------------------------------
 
 variable "cigale_runner_image_repository" {
@@ -155,11 +143,6 @@ variable "cigale_runner_image_tag" {
 
 variable "cigale_runner_tier" {
   description = "Tier for the GitHub Actions runner. The provider only accepts up to xlarge; the platform supports 4xlarge (8 CPU / 8Gi) which the runner needs - bump it in the console after apply."
-  type    = string
-  default = "xlarge"
-}
-
-variable "cigale_runner_replicas" {
-  type    = number
-  default = 1
+  type        = string
+  default     = "xlarge"
 }

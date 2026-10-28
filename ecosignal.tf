@@ -53,6 +53,7 @@ resource "hyperfluid_managed_postgresql" "db" {
 resource "hyperfluid_managed_postgresql_user" "db_user" {
   username           = "ecosignal"
   managed_postgresql = hyperfluid_managed_postgresql.db.id
+  permission_level   = "editor"
 }
 
 # NOTE: the compose geo_db image bundles geo_init.sh, which downloads/imports
@@ -77,6 +78,7 @@ resource "hyperfluid_managed_postgresql" "geo_db" {
 resource "hyperfluid_managed_postgresql_user" "geo_db_user" {
   username           = "ecosignal"
   managed_postgresql = hyperfluid_managed_postgresql.geo_db.id
+  permission_level   = "editor"
 }
 
 # ---------------------------------------------------------------------------
@@ -130,6 +132,15 @@ resource "hyperfluid_container_app" "rabbitmq" {
 # Backend (FastAPI / gunicorn)
 # ---------------------------------------------------------------------------
 
+# Custom function to get a secret path for postgresql
+
+locals {
+  # Usage: "${db_secret_path_prefix}/<attribute>" where attribute is "internal-host", "internal-port", "password", etc.
+  # See https://data-terra.ai.meso.umontpellier.fr/secret-manager/secrets?path=biodimedia%2Fdbaas%2Fpostgres%2Fecosignal-db%2Fuser%2Fecosignal
+  secret_path_prefix_db     = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.db.slug}/user/${hyperfluid_managed_postgresql_user.db_user.username}"
+  secret_path_prefix_geo_db = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.geo_db.slug}/user/${hyperfluid_managed_postgresql_user.geo_db_user.username}"
+}
+
 resource "hyperfluid_container_app" "backend" {
   env              = local.env
   slug             = "${var.name_prefix}-backend"
@@ -145,17 +156,20 @@ resource "hyperfluid_container_app" "backend" {
     # FIXME: can't do that cuz it creates a cycle since we need the backend to be up for the frontend to start (otherwise ca-ecosignal-backend is "not found" by nginx)
     # { name = "DOMAIN", value = provider::netparse::parse_url(hyperfluid_container_app.frontend.endpoint).host },
     { name = "DOMAIN", value = var.ecosignal_domain },
+    { name = "PROJECT_NAME", value = "EcoSignal" },
     # production | staging | local
     { name = "ENVIRONMENT", value = "production" },
-    { name = "BACKEND_CORS_ORIGINS", value = var.cors_origins },
+    { name = "BACKEND_CORS_ORIGINS", value = "https://${var.ecosignal_domain},https://cigaleapp.github.io,https://${var.cigale_domain}" },
     { name = "SECRET_KEY", secret = "${var.env_name}/${var.secret_path_secret_key}" },
     { name = "FIRST_SUPERUSER", value = "admin" },
     { name = "FIRST_SUPERUSER_PASSWORD", secret = "${var.env_name}/${var.secret_path_first_superuser_password}" },
-    { name = "POSTGRES_SERVER", value = provider::netparse::parse_url(hyperfluid_managed_postgresql.db.write_endpoint).host },
-    { name = "POSTGRES_PORT", value = provider::netparse::parse_url(hyperfluid_managed_postgresql.db.write_endpoint).port },
-    { name = "POSTGRES_DB", value = hyperfluid_managed_postgresql.db.database_name },
-    { name = "POSTGRES_USER", value = hyperfluid_managed_postgresql_user.db_user.username },
-    { name = "POSTGRES_PASSWORD", secret = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.db.slug}/user/${hyperfluid_managed_postgresql_user.db_user.username}/password" },
+    # get host part from hyperfluid_managed_postgresql.db.write_endpoint (strip https:// and port)
+    { name = "POSTGRES_SERVER", secret = "${local.secret_path_prefix_db}/internal-host" },
+    # get port part
+    { name = "POSTGRES_PORT", secret = "${local.secret_path_prefix_db}/internal-port" },
+    { name = "POSTGRES_DB", secret = "${local.secret_path_prefix_db}/database" },
+    { name = "POSTGRES_USER", secret = "${local.secret_path_prefix_db}/username" },
+    { name = "POSTGRES_PASSWORD", secret = "${local.secret_path_prefix_db}/password" },
     { name = "SENTRY_DSN", value = var.sentry_dsn },
     { name = "REDIS_HOST", value = hyperfluid_key_value_cache.redis.host },
     { name = "REDIS_PORT", value = hyperfluid_key_value_cache.redis.port },
@@ -167,13 +181,13 @@ resource "hyperfluid_container_app" "backend" {
     { name = "RABBITMQ_USER", value = "ecosignal" },
     { name = "RABBITMQ_PASSWORD", value = "ecosignal" },
     { name = "RABBITMQ_VHOST", value = "/" },
-    { name = "GEO_DB_SERVER", value = provider::netparse::parse_url(hyperfluid_managed_postgresql.geo_db.write_endpoint).host },
-    { name = "GEO_DB_PORT", value = provider::netparse::parse_url(hyperfluid_managed_postgresql.geo_db.write_endpoint).port },
-    { name = "GEO_DB_DB", value = hyperfluid_managed_postgresql.geo_db.database_name },
-    { name = "GEO_DB_USER", value = hyperfluid_managed_postgresql_user.geo_db_user.username },
-    { name = "GEO_DB_PASSWORD", secret = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.geo_db.slug}/user/${hyperfluid_managed_postgresql_user.geo_db_user.username}/password" },
+    { name = "GEO_DB_SERVER", secret = "${local.secret_path_prefix_geo_db}/internal-host" },
+    { name = "GEO_DB_PORT", secret = "${local.secret_path_prefix_geo_db}/internal-port" },
+    { name = "GEO_DB_DB", secret = "${local.secret_path_prefix_geo_db}/database" },
+    { name = "GEO_DB_USER", secret = "${local.secret_path_prefix_geo_db}/username" },
+    { name = "GEO_DB_PASSWORD", secret = "${local.secret_path_prefix_geo_db}/password" },
     # TODO: why?
-    { name = "SKIP_PRESTART", value = "true" },
+    { name = "SKIP_PRESTART", value = "false" },
     { name = "MEDIA_S3_MODE", value = "s3" },
     { name = "S3_ENDPOINT", value = data.hyperfluid_bucket_credentials.media.endpoint },
     { name = "S3_ACCESS_KEY", value = data.hyperfluid_bucket_credentials.media.access_key },
@@ -190,8 +204,9 @@ resource "hyperfluid_container_app" "backend" {
 
   # Compose healthcheck is GET /api/v1/health with a 300s start period
   # (migrations + initial data). Make sure the platform probe is equally patient.
-  health_check_path = "/api/v1/health"
-  health_check_port = 8000
+  # No health check for now so that the container is created for terraform
+  #   health_check_path = "/api/v1/health"
+  #   health_check_port = 8000
 
   expose_to_internet = false
 }

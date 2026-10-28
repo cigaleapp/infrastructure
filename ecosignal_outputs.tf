@@ -7,6 +7,10 @@ output "db_write_endpoint" {
   value = hyperfluid_managed_postgresql.db.write_endpoint
 }
 
+output "db_write_endpoint_host" {
+  value = provider::netparse::parse_url(hyperfluid_managed_postgresql.db.write_endpoint).host
+}
+
 output "geo_db_write_endpoint" {
   value = hyperfluid_managed_postgresql.geo_db.write_endpoint
 }

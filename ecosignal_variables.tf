@@ -6,12 +6,6 @@ variable "name_prefix" {
 
 # ---- Network -------------------------------------------------------------------
 
-variable "cors_origins" {
-  description = "From which origins to allow traffic to the API. Syntax is the same as the Access-Control-Allow-Origin header: a single origin, or a space-separated list of origins, or * to allow all."
-  type        = string
-  default     = "*"
-}
-
 variable "ecosignal_domain" {
   description = "Domain where the ecosignal frontend can be accessed via Internet"
   type        = string

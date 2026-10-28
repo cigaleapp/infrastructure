@@ -43,8 +43,3 @@ variable "pleye_tier" {
   type    = string
   default = "small"
 }
-
-variable "pleye_replicas" {
-  type    = number
-  default = 3
-}
