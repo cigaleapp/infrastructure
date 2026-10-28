@@ -36,7 +36,7 @@ jobs:
             -f http://ca-ecosignal-backend:8000/api/v1/auth-tokens \
             -X POST \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "username=admin&password=wrong"
+            -d "username=admin&password=$ADMINPASS"
           echo "Auth request succeeded!"
           while true; do sleep 10; done
           EOF

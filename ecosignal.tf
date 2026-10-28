@@ -270,6 +270,11 @@ resource "hyperfluid_container_app" "ecosignal_debug" {
   image_repository = "ghcr.io/cigaleapp/infrastructure/ecosignal-debug"
   image_tag        = "latest"
   resource_tier    = "nano"
+
+  env_vars = [{
+    name   = "ADMINPASS",
+    secret = "${var.env_name}/ecosignal/first-superuser-password"
+  }]
 }
 
 # ---------------------------------------------------------------------------
