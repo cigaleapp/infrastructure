@@ -269,6 +269,7 @@ resource "hyperfluid_container_app" "ecosignal_debug" {
   slug             = "${var.name_prefix}-debug"
   image_repository = "ghcr.io/cigaleapp/infrastructure/ecosignal-debug"
   image_tag        = "latest"
+  resource_tier    = "nano"
 }
 
 # ---------------------------------------------------------------------------
