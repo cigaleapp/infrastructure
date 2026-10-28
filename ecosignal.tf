@@ -196,6 +196,7 @@ resource "hyperfluid_container_app" "backend" {
     # TODO: get dynamically?
     { name = "S3_REGION", value = "default" },
     { name = "MEDIA_CACHE_TTL", value = "300" },
+    { name = "LOG_LEVEL", value = "debug" }
   ]
 
   ports = [
@@ -204,9 +205,8 @@ resource "hyperfluid_container_app" "backend" {
 
   # Compose healthcheck is GET /api/v1/health with a 300s start period
   # (migrations + initial data). Make sure the platform probe is equally patient.
-  # No health check for now so that the container is created for terraform
-  #   health_check_path = "/api/v1/health"
-  #   health_check_port = 8000
+#   health_check_path = "/api/v1/health"
+#   health_check_port = 8000
 
   expose_to_internet = false
 }
