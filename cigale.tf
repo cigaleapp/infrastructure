@@ -97,7 +97,7 @@ resource "hyperfluid_container_app" "cigale_app" {
   autoscaling      = var.autoscaling_1_3
 
   ports = [
-    { name = "http", port = 80, protocol = "HTTP", primary = true },
+    { name = "http", port = 3000, protocol = "HTTP", primary = true },
   ]
 
   expose_to_internet = true
