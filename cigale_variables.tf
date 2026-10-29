@@ -123,7 +123,7 @@ variable "cigale_cors_proxy_image_repository" {
 
 variable "cigale_cors_proxy_image_tag" {
   type    = string
-  default = "main"
+  default = "master"
 }
 
 variable "cigale_cors_proxy_tier" {
