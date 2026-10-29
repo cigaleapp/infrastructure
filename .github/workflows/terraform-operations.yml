@@ -31,6 +31,11 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_S3_SECRET_KEY }}
       AWS_REGION: ${{ secrets.TF_S3_DEFAULT_REGION }}
 
+    concurrency: 
+      group: terraform-state-lock
+      queue: ${{ inputs.operation == 'apply' && 'single' || 'max' }}
+      cancel-in-progress: ${{ inputs.operation == 'apply' }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
