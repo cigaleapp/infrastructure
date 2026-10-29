@@ -202,7 +202,7 @@ resource "hyperfluid_container_app" "cigale_beamup" {
     { name = "SMTP_HOST", value = "ca-${hyperfluid_container_app.cigale_beamup_smtp.slug}" },
     { name = "SMTP_PORT", value = "25" },
     { name = "MAILS_FROM", value = "noreply@${var.cigale_domain}" },
-    { name = "DATABASE_URL", secret = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.beamup_db.slug}/user/${hyperfluid_managed_postgresql_user.beamup.username}/internal-database-url" }
+    { name = "DATABASE_URL", secret = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.beamup_db.slug}/user/${hyperfluid_managed_postgresql_user.beamup.username}/internal-database-url" },
   ]
 
   expose_to_internet = true

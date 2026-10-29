@@ -78,6 +78,13 @@ resource "hyperfluid_container_app" "pleye" {
     { name = "http", port = 3000, protocol = "HTTP", primary = true },
   ]
 
+  env_vars = [
+    { name = "VERSION", value = "hf0" },
+    { name = "MASTER_KEY", value = "allacmafusca" },
+    { name = "DATABASE_URL", secret = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.pleye_db.slug}/user/${hyperfluid_managed_postgresql_user.pleye.username}/internal-database-url" }
+  ]
+
+
   expose_to_internet = true
   tags               = ["pleye", "developers", "terraform"]
 }
