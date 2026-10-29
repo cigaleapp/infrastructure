@@ -28,6 +28,19 @@
 #   and DATABASE_URL_BEAMUP (cigale-beamup-db).
 # ---------------------------------------------------------------------------
 
+locals {
+  databases = [
+    {
+      instance = hyperfluid_managed_postgresql.pleye_db,
+      user     = hyperfluid_managed_postgresql_user.pleye
+    },
+    {
+      instance = hyperfluid_managed_postgresql.beamup_db,
+      user     = hyperfluid_managed_postgresql_user.beamup
+    }
+  ]
+}
+
 resource "hyperfluid_container_app" "db_studio" {
   env              = local.env
   slug             = "biodimedia-db-studio"
@@ -39,6 +52,13 @@ resource "hyperfluid_container_app" "db_studio" {
 
   ports = [
     { name = "http", port = 4983, protocol = "HTTP", primary = true },
+  ]
+
+  env_vars = [
+    for db in local.databases : {
+      name   = "DATABASE_URL_${upper(replace(db.instance.name, "-", "_"))}"
+      secret = "${var.env_name}/dbaas/postgres/${db.instance.name}/user/${db.user.username}/internal-database-url"
+    }
   ]
 
   expose_to_internet = true
