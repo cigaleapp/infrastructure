@@ -19,12 +19,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - service: backend
-            # restart: ecosignal-backend ecosignal-worker ecosignal-worker-analysis
-            restart: ecosignal-worker
-          - service: frontend
-            restart: ecosignal-frontend
           - service: geo_db
+          - service: frontend
+            restart: >
+              ecosignal-frontend
+          - service: backend
+            restart: >
+              ecosignal-backend
+              ecosignal-worker
+              ecosignal-worker-analysis
 
     name: Build ${{ matrix.service }} image
 
