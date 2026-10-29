@@ -127,10 +127,7 @@ resource "hyperfluid_container_app" "rabbitmq" {
   image_repository = "rabbitmq"
   image_tag        = "3-management"
   resource_tier    = var.rabbitmq_tier
-  autoscaling = {
-    max_replicas = 3
-    min_replicas = 1
-  }
+  autoscaling      = var.autoscaling_1_3
 
   env_vars = [
     { name = "RABBITMQ_DEFAULT_USER", value = "ecosignal" },

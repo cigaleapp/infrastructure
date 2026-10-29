@@ -89,7 +89,7 @@ resource "hyperfluid_container_app" "cigale_app" {
   image_tag        = var.cigale_app_image_tag
   resource_tier    = var.cigale_app_tier
   enabled          = true
-  autoscaling      = { min_replicas = 1, max_replicas = 3 }
+  autoscaling      = var.autoscaling_1_3
 
   ports = [
     { name = "http", port = 80, protocol = "HTTP", primary = true },
@@ -111,7 +111,7 @@ resource "hyperfluid_container_app" "cigale_dev" {
   image_repository = var.cigale_dev_image_repository
   image_tag        = var.cigale_dev_image_tag
   resource_tier    = var.cigale_dev_tier
-  autoscaling      = { min_replicas = 1, max_replicas = 3 }
+  autoscaling      = var.autoscaling_1_3
   enabled          = var.apps_enabled
 
   ports = [
@@ -170,7 +170,7 @@ resource "hyperfluid_container_app" "cigale_beamup" {
   image_repository = var.cigale_beamup_image_repository
   image_tag        = var.cigale_beamup_image_tag
   resource_tier    = var.cigale_beamup_tier
-  autoscaling      = { min_replicas = 1, max_replicas = 3 }
+  autoscaling      = var.autoscaling_1_3
   enabled          = var.apps_enabled
 
   ports = [
@@ -214,7 +214,7 @@ resource "hyperfluid_container_app" "cigale_cors_proxy" {
   image_repository = var.cigale_cors_proxy_image_repository
   image_tag        = var.cigale_cors_proxy_image_tag
   resource_tier    = var.cigale_cors_proxy_tier
-  autoscaling      = { min_replicas = 1, max_replicas = 5 }
+  autoscaling      = var.autoscaling_1_5
   enabled          = var.apps_enabled
 
   ports = [
