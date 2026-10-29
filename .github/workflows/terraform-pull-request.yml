@@ -1,0 +1,17 @@
+name: Terraform (PR)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.tf'
+      - .terraform.lock.hcl
+      - .github/workflows/terraform-*.yml
+
+jobs:
+  plan:
+    name: Plan
+    uses: ./.github/workflows/terraform-operations.yml
+    secrets: inherit
+    with:
+      operation: plan

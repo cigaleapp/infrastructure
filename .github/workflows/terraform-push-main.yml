@@ -1,0 +1,25 @@
+name: Terraform
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/*.tf'
+      - .terraform.lock.hcl
+      - .github/workflows/terraform-*.yml
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Confirm that you want to apply the Terraform changes. This will make changes to the infrastructure.'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  apply:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm == 'true' || github.event_name == 'push'
+    name: Apply
+    uses: ./.github/workflows/terraform-operations.yml
+    secrets: inherit
+    with:
+      operation: apply
