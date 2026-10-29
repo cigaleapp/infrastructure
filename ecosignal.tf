@@ -25,6 +25,7 @@
 resource "hyperfluid_bucket" "media" {
   env  = local.env
   name = "${var.name_prefix}-media"
+  # TODO: ask for quota attribute
 }
 
 data "hyperfluid_bucket_credentials" "media" {
