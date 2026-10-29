@@ -144,9 +144,9 @@ resource "hyperfluid_container_app" "cigale_dev" {
 				use_path_style 
 			}
 
-			# log default { 
-			#    level DEBUG
-			# }
+			log default { 
+			   level DEBUG
+			}
 		}
 
 		http://${var.cigale_dev_domain} {
