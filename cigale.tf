@@ -135,7 +135,7 @@ resource "hyperfluid_container_app" "cigale_dev" {
     mount_path = "/etc/caddy/Caddyfile",
     content    = <<-EOT
 		{
-			filesystem devdeploys s3 {
+			filesystem bucket s3 {
 				bucket cigale-dev-deployments
 				region default
 
@@ -151,7 +151,7 @@ resource "hyperfluid_container_app" "cigale_dev" {
 
 		http://${var.cigale_dev_domain} {
 			file_server {
-				fs devdeploys
+				fs bucket
 				browse
 			}
 
@@ -202,6 +202,7 @@ resource "hyperfluid_container_app" "cigale_beamup" {
     { name = "SMTP_HOST", value = "ca-${hyperfluid_container_app.cigale_beamup_smtp.slug}" },
     { name = "SMTP_PORT", value = "25" },
     { name = "MAILS_FROM", value = "noreply@${var.cigale_domain}" },
+    { name = "DATABASE_URL", secret = "${var.env_name}/dbaas/postgres/${hyperfluid_managed_postgresql.beamup_db.slug}/user/${hyperfluid_managed_postgresql_user.beamup.username}/internal-database-url" }
   ]
 
   expose_to_internet = true
@@ -224,6 +225,10 @@ resource "hyperfluid_container_app" "cigale_beamup_smtp" {
 
   ports = [
     { name = "smtp", port = 25, protocol = "TCP" },
+  ]
+
+  env_vars = [
+    { name = "MAILNAME", value = "data-terra.ai.meso.umontpellier.fr" }
   ]
 
   expose_to_internet = false
