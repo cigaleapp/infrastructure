@@ -265,24 +265,24 @@ resource "hyperfluid_container_app" "cigale_cors_proxy" {
 # Github Actions runner (WIP)
 # ---------------------------------------------------------------------------
 
-# data "hyperfluid_virtual_machine_images" "vm_catalog" {
-#   env = local.env
-# }
+data "hyperfluid_virtual_machine_images" "vm_catalog" {
+  env = local.env
+}
 
-# locals {
-#   ubuntu = data.hyperfluid_virtual_machine_images.vm_catalog.images[0]
-# }
+locals {
+  ubuntu = data.hyperfluid_virtual_machine_images.vm_catalog.images[0]
+}
 
-# resource "hyperfluid_virtual_machine" "cigale_github_actions" {
-#   env              = local.env
-#   name             = "cigale-github-actions"
-#   cpu              = "4"
-#   memory           = "16Gi"
-#   disk             = "40Gi"
-#   image_source_ref = local.ubuntu.image_source_ref
-#   image_key        = local.ubuntu.image_key
-#   running          = false
-# }
+resource "hyperfluid_virtual_machine" "cigale_github_actions" {
+  env              = local.env
+  name             = "cigale-github-actions"
+  cpu              = "4"
+  memory           = "16Gi"
+  disk             = "40Gi"
+  image_source_ref = local.ubuntu.image_source_ref
+  image_key        = local.ubuntu.image_key
+  running          = false
+}
 
 
 # ---------------------------------------------------------------------------
