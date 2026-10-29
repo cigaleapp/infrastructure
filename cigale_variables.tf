@@ -35,7 +35,7 @@ variable "beamup_db_storage_gb" {
 
 variable "cigale_app_image_repository" {
   type    = string
-  default = "ghcr.io/cigaleapp/infrastructure/cigale-app"
+  default = "ghcr.io/cigaleapp/cigale"
 }
 
 variable "cigale_app_image_tag" {
