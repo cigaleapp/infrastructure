@@ -34,8 +34,8 @@ resource "hyperfluid_container_app" "db_studio" {
   image_repository = var.db_studio_image_repository
   image_tag        = var.db_studio_image_tag
   resource_tier    = var.db_studio_tier
-  replicas         = var.db_studio_replicas
   enabled          = var.apps_enabled
+  autoscaling      = var.autoscaling_1_3
 
   ports = [
     { name = "http", port = 3000, protocol = "HTTP", primary = true },

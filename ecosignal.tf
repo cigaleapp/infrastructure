@@ -286,6 +286,8 @@ resource "hyperfluid_container_app" "worker" {
     [{ name = "WORKER_QUEUE", value = "interactive" }]
   )
 
+  ports = []
+
   command = ["python", "-m", "app.workers.rabbitmq_worker"]
 
   expose_to_internet = false
@@ -304,6 +306,8 @@ resource "hyperfluid_container_app" "worker_analysis" {
     hyperfluid_container_app.backend.env_vars,
     [{ name = "WORKER_QUEUE", value = "analysis" }]
   )
+
+  ports = []
 
   command = ["python", "-m", "app.workers.rabbitmq_worker"]
 
