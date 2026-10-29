@@ -128,7 +128,7 @@ variable "cigale_cors_proxy_image_tag" {
 
 variable "cigale_cors_proxy_tier" {
   type    = string
-  default = "nano"
+  default = "micro"
 }
 
 # ---- cigale-github-actions-runner -------------------------------------------
