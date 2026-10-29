@@ -75,7 +75,7 @@ resource "hyperfluid_container_app" "pleye" {
   autoscaling      = { min_replicas = 1, max_replicas = 3 }
 
   ports = [
-    { name = "http", port = 80, protocol = "HTTP", primary = true },
+    { name = "http", port = 3000, protocol = "HTTP", primary = true },
   ]
 
   expose_to_internet = true
