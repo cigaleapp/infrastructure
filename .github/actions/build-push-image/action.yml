@@ -162,7 +162,7 @@ runs:
 
     - if: inputs.restart
       name: Setup hfctl
-      uses: nudibranches-tech/setup-hfctl@v1
+      uses: nudibranches-tech/setup-hfctl@be0f3b8e2327ac7b317766b4488a278d4bfba170 # v1
       with:
         service-account: ${{ inputs.service-account-json }}
         console-url: https://ai.meso.umontpellier.fr
