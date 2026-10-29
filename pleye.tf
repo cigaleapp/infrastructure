@@ -71,7 +71,7 @@ resource "hyperfluid_container_app" "pleye" {
   image_repository = var.pleye_image_repository
   image_tag        = var.pleye_image_tag
   resource_tier    = var.pleye_tier
-  enabled          = var.apps_enabled
+  enabled          = true
   autoscaling      = { min_replicas = 1, max_replicas = 3 }
 
   ports = [
