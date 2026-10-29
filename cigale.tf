@@ -136,7 +136,7 @@ resource "hyperfluid_container_app" "cigale_dev" {
     content    = <<-EOT
 		{
 			filesystem bucket s3 {
-				bucket cigale-dev-deployments
+				bucket ${data.hyperfluid_bucket_credentials.cigale_dev_files.bucket_name}
 				region default
 
 				endpoint ${data.hyperfluid_bucket_credentials.cigale_dev_files.endpoint}
