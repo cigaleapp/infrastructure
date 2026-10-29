@@ -78,6 +78,11 @@ resource "hyperfluid_bucket" "cigale_beamup_attachments" {
   name = "cigale-beamup-attachments"
 }
 
+data "hyperfluid_bucket_credentials" "cigale_beamup_attachments" {
+  env         = local.env
+  bucket_name = hyperfluid_bucket.cigale_beamup_attachments.name
+}
+
 # ---------------------------------------------------------------------------
 # cigale-app (client-side app, no env vars)
 # ---------------------------------------------------------------------------
@@ -116,6 +121,14 @@ resource "hyperfluid_container_app" "cigale_dev" {
 
   ports = [
     { name = "http", port = 80, protocol = "HTTP", primary = true },
+  ]
+
+  env_vars = [
+    { name = "AWS_ACCESS_KEY_ID", value = data.hyperfluid_bucket_credentials.cigale_dev_files.access_key },
+    { name = "AWS_SECRET_ACCESS_KEY", value = data.hyperfluid_bucket_credentials.cigale_dev_files.secret_key },
+    { name = "AWS_ENDPOINT_URL", value = data.hyperfluid_bucket_credentials.cigale_dev_files.endpoint },
+    { name = "AWS_DEFAULT_REGION", value = "default" },
+    { name = "DEPLOYMENT_DOMAIN", value = var.cigale_dev_domain }
   ]
 
   file_mounts = [{
@@ -177,6 +190,20 @@ resource "hyperfluid_container_app" "cigale_beamup" {
     { name = "http", port = 3000, protocol = "HTTP", primary = true },
   ]
 
+
+  env_vars = [
+    { name = "S3_ACCESS_KEY_ID", value = data.hyperfluid_bucket_credentials.cigale_beamup_attachments.access_key },
+    { name = "S3_SECRET_ACCESS_KEY", value = data.hyperfluid_bucket_credentials.cigale_beamup_attachments.secret_key },
+    { name = "S3_ENDPOINT", value = data.hyperfluid_bucket_credentials.cigale_beamup_attachments.endpoint },
+    { name = "S3_DEFAULT_REGION", value = "default" },
+    { name = "S3_BUCKET", value = hyperfluid_bucket.cigale_beamup_attachments.name },
+    { name = "PROD", value = "true" },
+    { name = "ALLOWED_ORIGINS", value = "https://${var.cigale_domain},https://cigaleapp.github.io" },
+    { name = "SMTP_HOST", value = "ca-${hyperfluid_container_app.cigale_beamup_smtp.slug}" },
+    { name = "SMTP_PORT", value = "25" },
+    { name = "MAILS_FROM", value = "noreply@${var.cigale_domain}" },
+  ]
+
   expose_to_internet = true
   tags               = ["cigale", "beamup", "prod", "terraform"]
 }
@@ -219,6 +246,10 @@ resource "hyperfluid_container_app" "cigale_cors_proxy" {
 
   ports = [
     { name = "http", port = 3000, protocol = "HTTP", primary = true },
+  ]
+
+  env_vars = [
+    { name = "PORT", value = "3000" }
   ]
 
   expose_to_internet = true
