@@ -287,7 +287,7 @@ resource "hyperfluid_container_app" "worker" {
   )
 
   ports = [{
-    name = "dummy", port = 8080, protocol = "TCP", primary = true
+    name = "dummy", port = 8080, protocol = "HTTP", primary = true
   }]
 
   command = ["python", "-m", "app.workers.rabbitmq_worker"]
@@ -310,7 +310,7 @@ resource "hyperfluid_container_app" "worker_analysis" {
   )
 
   ports = [{
-    name = "dummy", port = 8080, protocol = "TCP", primary = true
+    name = "dummy", port = 8080, protocol = "HTTP", primary = true
   }]
 
   command = ["python", "-m", "app.workers.rabbitmq_worker"]
