@@ -33,7 +33,7 @@ variable "frontend_image_repository" {
 
 variable "backend_image_tag" {
   type    = string
-  default = "s3"
+  default = "sha-63ae6b8"
 }
 
 variable "frontend_image_tag" {
