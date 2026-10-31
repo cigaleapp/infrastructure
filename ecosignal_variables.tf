@@ -20,20 +20,18 @@ variable "ecosignal_domain" {
 variable "backend_image_repository" {
   description = "Repository of the image built from ./backend."
   type        = string
-  #   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-backend"
-  default = "ghcr.io/cigaleapp/infrastructure/ecosignal-backend"
+  default     = "data-terra.rg.ai.meso.umontpellier.fr/biodimedia/ecosignal/backend"
 }
 
 variable "frontend_image_repository" {
   description = "Repository of the image built from ./frontend."
   type        = string
-  #   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-frontend"
-  default = "ghcr.io/cigaleapp/infrastructure/ecosignal-frontend"
+  default     = "data-terra.rg.ai.meso.umontpellier.fr/biodimedia/ecosignal/frontend"
 }
 
 variable "backend_image_tag" {
   type    = string
-  default = "sha-63ae6b8"
+  default = "s3"
 }
 
 variable "frontend_image_tag" {
