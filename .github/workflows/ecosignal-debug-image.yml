@@ -43,7 +43,8 @@ jobs:
       - name: Build and push debug image
         uses: ./.github/actions/build-push-image
         with:
-          service: ecosignal-debug
+          project: ecosignal
+          service: debug
           restart: ecosignal-frontend # its a init container for frontend
           service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
           source: inline

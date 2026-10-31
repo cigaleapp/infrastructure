@@ -38,7 +38,8 @@ jobs:
       - name: Build and push ${{ matrix.service }} image
         uses: ./.github/actions/build-push-image
         with:
-          service: ecosignal-${{ matrix.service }}
+          project: ecosignal
+          service: ${{ matrix.service }}
           restart: ${{ matrix.restart }}
           service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
           source: repo

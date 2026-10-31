@@ -4,12 +4,14 @@ description: >-
   tags it, and pushes it to a container registry.
 
 inputs:
+  project:
+    description: >-
+      Project name used to build the image name. The full image name is
+      <registry>/biodimedia/<project>/<service>.
   service:
     description: >-
       Service name used to build the image name. The full image name is
-      <registry>/default/terraforma-biodimedia/<service> (e.g.
-      service "ecosignal-backend" ->
-      data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/ecosignal-backend).
+      <registry>/biodimedia/<project>/<service>.
     required: true
   registry:
     description: Container registry to log in to and push to
@@ -59,7 +61,7 @@ inputs:
   ghcr:
     description: >-
       Whether to also push the image to ghcr.io of the current repository
-      (ghcr.io/<owner>/<repo>/<service>).
+      (ghcr.io/<owner>/<repo>/<project>-<service>).
     required: false
     default: 'true'
   restart:
@@ -122,14 +124,14 @@ runs:
         REPO: ${{ github.repository }}
         SERVICE: ${{ inputs.service }}
         REGISTRY: ${{ inputs.registry }}
+        PROJECT: ${{ inputs.project }}
       run: |
         service=$(echo "$SERVICE" | tr '_' '-')
-        # Only publish on ghcr.io for now, seems like upload to data terra never finishes
-        # images="${REGISTRY}/default/terraforma-biodimedia/${service}"
+        project=$(echo "$PROJECT" | tr '_' '-')
+        images="${REGISTRY}/biodimedia/${project}/${service}"
         if [ "$GHCR" = "true" ]; then
-          # images="$images
-          # ghcr.io/$(echo "$REPO" | tr '[:upper:]' '[:lower:]')/${service}"
-          images="ghcr.io/$(echo "$REPO" | tr '[:upper:]' '[:lower:]')/${service}"
+          images="$images
+          ghcr.io/$(echo "$REPO" | tr '[:upper:]' '[:lower:]')/${project}-${service}"
         fi
         {
           echo "images<<EOF"

@@ -23,7 +23,8 @@ jobs:
       - name: Build and push image
         uses: ./.github/actions/build-push-image
         with:
-          service: cigale-cors-proxy
+          project: cigale
+          service: cors-proxy
           service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
           source: repo
           repository: cigaleapp/cors-anywhere

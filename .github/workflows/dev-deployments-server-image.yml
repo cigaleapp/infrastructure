@@ -23,6 +23,7 @@ jobs:
       - name: Build and push image
         uses: ./.github/actions/build-push-image
         with:
+          project: cigale
           service: dev-deployments-server
           restart: cigale-dev
           service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
