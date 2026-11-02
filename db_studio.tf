@@ -82,7 +82,7 @@ resource "hyperfluid_container_app" "redis_studio" {
 		{ name = "RI_APP_PORT", value = "5540" }
 	]
 
-	health_check_path = "/api/v1/health"
+	health_check_path = "/api/health"
 	health_check_port = 5540
 
 	expose_to_internet = true
