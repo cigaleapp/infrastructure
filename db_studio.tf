@@ -65,6 +65,10 @@ resource "hyperfluid_container_app" "db_studio" {
   tags               = ["cigale", "development", "terraform"]
 }
 
+locals {
+	ecosignal_cache_secret = "biodimedia/hf-key-value-cache/ecosignal-cache"
+}
+
 resource "hyperfluid_container_app" "redis_studio" {
 	env = local.env
 	slug = "biodimedia-redis-studio"
@@ -79,7 +83,11 @@ resource "hyperfluid_container_app" "redis_studio" {
 	]
 
 	env_vars = [
-		{ name = "RI_APP_PORT", value = "5540" }
+		{ name = "RI_APP_PORT", value = "5540" },
+		{ name = "RI_REDIS_HOSTecosignal", value = "hkv-ecosignal-cache.hf-data-terra-biodimedia.svc.cluster.local" },
+		{ name = "RI_REDIS_PORTecosignal", value = "6379" },
+		{ name = "RI_REDIS_USERNAMEecosignal", secret = "${local.ecosignal_cache_secret}/username" },
+		{ name = "RI_REDIS_PASSWORDecosignal", secret = "${local.ecosignal_cache_secret}/password" },
 	]
 
 	health_check_path = "/api/health"
