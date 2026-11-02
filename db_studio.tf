@@ -78,7 +78,13 @@ resource "hyperfluid_container_app" "redis_studio" {
 		{ name = "http", port = 5540, protocol = "HTTP", primary = true },
 	]
 
-	env_vars = []
+	env_vars = [
+		{ name = "REDIS_HOST", value = hyperfluid_managed_redis.redis_studio.host },
+		{ name = "REDIS_PORT", value = tostring(hyperfluid_managed_redis.redis_studio.port) },
+	]
+
+	health_check_path = "/api/v1/health"
+	health_check_port = 5540
 
 	expose_to_internet = true
 	tags = ["ecosignal", "development", "terraform"]
