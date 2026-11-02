@@ -79,8 +79,7 @@ resource "hyperfluid_container_app" "redis_studio" {
 	]
 
 	env_vars = [
-		{ name = "REDIS_HOST", value = hyperfluid_managed_redis.redis_studio.host },
-		{ name = "REDIS_PORT", value = tostring(hyperfluid_managed_redis.redis_studio.port) },
+		{ name = "RI_APP_PORT", value = "5540" }
 	]
 
 	health_check_path = "/api/v1/health"
