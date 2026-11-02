@@ -65,6 +65,25 @@ resource "hyperfluid_container_app" "db_studio" {
   tags               = ["cigale", "development", "terraform"]
 }
 
+resource "hyperfluid_container_app" "redis_studio" {
+	env = local.env
+	slug = "biodimedia-redis-studio"
+	image_repository = "redis/redisinsight"
+	image_tag = "latest"
+	resource_tier = "nano"
+	enabled= true
+	replicas = 1
+
+	ports = [
+		{ name = "http", port = 5540, protocol = "HTTP", primary = true },
+	]
+
+	env_vars = []
+
+	expose_to_internet = true
+	tags = ["ecosignal", "development", "terraform"]
+}
+
 # ---------------------------------------------------------------------------
 # Service links
 # ---------------------------------------------------------------------------
