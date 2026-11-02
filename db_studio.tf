@@ -70,7 +70,7 @@ resource "hyperfluid_container_app" "redis_studio" {
 	slug = "biodimedia-redis-studio"
 	image_repository = "redis/redisinsight"
 	image_tag = "latest"
-	resource_tier = "nano"
+	resource_tier = "micro"
 	enabled= true
 	replicas = 1
 
