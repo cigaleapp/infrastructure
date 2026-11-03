@@ -162,6 +162,18 @@ resource "hyperfluid_container_app" "cigale_dev" {
 			handle_errors {
 				respond "{err.status_code} {err.status_text}"
 			}
+
+			header {
+				Access-Control-Allow-Headers *
+				Access-Control-Allow-Methods *
+				Access-Control-Allow-Origin *
+			}
+
+			@options {
+				method OPTIONS
+			}
+			
+			respond @options 204
 		}
 	EOT
   }]
