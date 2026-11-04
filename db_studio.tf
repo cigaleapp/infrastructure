@@ -47,7 +47,6 @@ resource "hyperfluid_container_app" "db_studio" {
   image_repository = var.db_studio_image_repository
   image_tag        = var.db_studio_image_tag
   resource_tier    = var.db_studio_tier
-  enabled          = var.apps_enabled
   autoscaling      = var.autoscaling_1_3
 
   ports = [
@@ -80,7 +79,6 @@ resource "hyperfluid_container_app" "redis_studio" {
 	image_repository = "redis/redisinsight"
 	image_tag = "latest"
 	resource_tier = "micro"
-	enabled= true
 	replicas = 1
 
 	ports = [
