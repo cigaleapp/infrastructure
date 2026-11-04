@@ -54,12 +54,17 @@ resource "hyperfluid_container_app" "db_studio" {
     { name = "http", port = 4983, protocol = "HTTP", primary = true },
   ]
 
-  env_vars = [
-    for db in local.databases : {
-      name   = "DATABASE_URL_${upper(replace(db.instance.name, "-", "_"))}"
-      secret = "${var.env_name}/dbaas/postgres/${db.instance.name}/user/${db.user.username}/internal-database-url"
-    }
-  ]
+  env_vars = concat(
+	[
+		for db in local.databases : {
+		name   = "DATABASE_URL_${upper(replace(db.instance.name, "-", "_"))}"
+		secret = "${var.env_name}/dbaas/postgres/${db.instance.name}/user/${db.user.username}/internal-database-url"
+		}
+	],
+	[
+		{ name = "DATABASE_URL_ECOSIGNAL", value = "psql://postgres:postgres@ca-ecosignal-db-postgis:5432/ecosignal" }
+	]
+  )
 
   expose_to_internet = true
   tags               = ["cigale", "development", "terraform"]
