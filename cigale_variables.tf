@@ -63,9 +63,8 @@ variable "cigale_dev_domain" {
 # ---- cigale-dev -------------------------------------------------------------
 
 variable "cigale_dev_image_repository" {
-  type = string
-  #   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/dev-deployments-server"
-  default = "ghcr.io/cigaleapp/infrastructure/dev-deployments-server"
+  type    = string
+  default = "data-terra.rg.ai.meso.umontpellier.fr/biodimedia/cigale/dev-deployments-server"
 }
 
 variable "cigale_dev_image_tag" {
@@ -116,9 +115,8 @@ variable "cigale_beamup_smtp_tier" {
 # ---- cigale-cors-proxy ------------------------------------------------------
 
 variable "cigale_cors_proxy_image_repository" {
-  type = string
-  #   default = "data-terra.rg.ai.meso.umontpellier.fr/default/terraforma-biodimedia/cigale-cors-proxy"
-  default = "ghcr.io/cigaleapp/infrastructure/cigale-cors-proxy"
+  type    = string
+  default = "data-terra.rg.ai.meso.umontpellier.fr/biodimedia/cigale/cors-proxy"
 }
 
 variable "cigale_cors_proxy_image_tag" {

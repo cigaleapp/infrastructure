@@ -53,17 +53,17 @@ output "app_env_reference" {
       # plus the inline Caddyfile mounted at /etc/caddy/Caddyfile
     }
     cigale-beamup = {
-      PROD                = "true"
-      ALLOWED_ORIGINS     = "https://cigaleapp.github.io,http://localhost:5173,https://cigale.data-terra.fr,${hyperfluid_container_app.cigale_app.endpoint}"
-      SMTP_HOST           = hyperfluid_container_app.cigale_beamup_smtp.slug
-      SMTP_PORT           = "25"
-      MAILS_FROM          = "beamup@data-terra.ai.meso.umontpellier.fr"
-      S3_ACCESS_KEY_ID    = "from: hfctl buckets credentials cigale-beamup-attachments -e biodimedia"
+      PROD                 = "true"
+      ALLOWED_ORIGINS      = "https://cigaleapp.github.io,http://localhost:5173,https://cigale.data-terra.fr,${hyperfluid_container_app.cigale_app.endpoint}"
+      SMTP_HOST            = hyperfluid_container_app.cigale_beamup_smtp.slug
+      SMTP_PORT            = "25"
+      MAILS_FROM           = "beamup@data-terra.ai.meso.umontpellier.fr"
+      S3_ACCESS_KEY_ID     = "from: hfctl buckets credentials cigale-beamup-attachments -e biodimedia"
       S3_SECRET_ACCESS_KEY = "from: hfctl buckets credentials cigale-beamup-attachments -e biodimedia"
-      S3_ENDPOINT         = "http://data-terra.s3-gateway.ai.meso.umontpellier.fr"
-      S3_DEFAULT_REGION   = "biodimedia"
-      S3_BUCKET           = hyperfluid_bucket.cigale_beamup_attachments.name
-      DATABASE_URL        = "secret_ref: biodimedia/dbaas/postgres/cigale-beamup-db/user/beamup/internal-database-url"
+      S3_ENDPOINT          = "http://data-terra.s3-gateway.ai.meso.umontpellier.fr"
+      S3_DEFAULT_REGION    = "biodimedia"
+      S3_BUCKET            = hyperfluid_bucket.cigale_beamup_attachments.name
+      DATABASE_URL         = "secret_ref: biodimedia/dbaas/postgres/cigale-beamup-db/user/beamup/internal-database-url"
     }
     cigale-beamup-smtp = {
       MAILNAME = "data-terra.ai.meso.umontpellier.fr"
@@ -72,12 +72,12 @@ output "app_env_reference" {
       PORT = "3000"
     }
     cigale-github-actions-runner = {
-      ORG_NAME      = "cigaleapp"
-      RUNNER_NAME   = "dataterra"
-      RUNNER_SCOPE  = "org"
+      ORG_NAME       = "cigaleapp"
+      RUNNER_NAME    = "dataterra"
+      RUNNER_SCOPE   = "org"
       RUNNER_WORKDIR = "/_work"
-      ACCESS_TOKEN  = "set manually (GitHub runner token)"
-      LABELS        = "hyperfluid,hyperfluid-4xl"
+      ACCESS_TOKEN   = "set manually (GitHub runner token)"
+      LABELS         = "hyperfluid,hyperfluid-4xl"
     }
   }
 }

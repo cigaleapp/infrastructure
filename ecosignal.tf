@@ -345,12 +345,6 @@ resource "hyperfluid_container_app" "frontend" {
     { name = "ADMINPASS", secret = "${var.env_name}/ecosignal/first-superuser-password" }
   ]
 
-  init_containers = [{
-    name             = "debug-backend-communication",
-    image_repository = "ghcr.io/cigaleapp/infrastructure/ecosignal-debug",
-    image_tag        = "latest",
-  }]
-
   health_check_path = "/"
   health_check_port = 80
 
