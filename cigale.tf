@@ -273,6 +273,60 @@ resource "hyperfluid_container_app" "cigale_cors_proxy" {
   tags               = ["cigale", "prod", "terraform"]
 }
 
+# issue creation servers
+
+# api 
+
+resource "hyperfluid_container_app" "cigale_issue_creator_server" {
+  env              = local.env
+  slug             = "cigale-issue-creator-server"
+  image_repository = "ghcr.io/cigaleapp/infrastructure/cigale-issue-creator-server"
+  image_tag        = "latest"
+  resource_tier    = "nano"
+  replicas         = 1
+  enabled          = var.apps_enabled
+
+  ports = [
+    { name = "http", port = 3003, protocol = "HTTP", primary = true }
+  ]
+
+  env_vars = [
+
+  ]
+
+  expose_to_internet = true
+  tags               = ["cigale", "prod", "terraform"]
+}
+
+# discord bot 
+
+resource "hyperfluid_container_app" "cigale_issue_creator_discord_bot" {
+  env              = local.env
+  slug             = "cigale-issue-creator-discord-bot"
+  image_repository = "ghcr.io/cigaleapp/infrastructure/cigale-issue-creator-discord-bot"
+  image_tag        = "latest"
+  resource_tier    = "nano"
+  replicas         = 1
+  enabled          = var.apps_enabled
+
+  ports = []
+
+  env_vars = [
+    { name = "BOT_TOKEN", secret = "biodimedia/cigale-issue-creator-discord-bot/bot-token" },
+    { name = "GUILD_ID", secret = "biodimedia/cigale-issue-creator-discord-bot/guild-id" },
+    { name = "GITHUB_APP_ID", secret = "biodimedia/cigale-issue-creator-discord-bot/github-app-id" },
+    { name = "GITHUB_APP_INSTALLATION_ID", secret = "biodimedia/cigale-issue-creator-discord-bot/github-app-installation-id" },
+    { name = "GITHUB_APP_KEY", secret = "biodimedia/cigale-issue-creator-discord-bot/github-app-key" },
+    { name = "GITHUB_REPOSITORY", value = "cigaleapp/cigale" },
+    { name = "GITHUB_USERNAME", secret = "gwennlbh" },
+  ]
+
+  expose_to_internet = false
+  tags               = ["cigale", "prod", "terraform"]
+}
+
+
+
 # ---------------------------------------------------------------------------
 # Github Actions runner (WIP)
 # ---------------------------------------------------------------------------
