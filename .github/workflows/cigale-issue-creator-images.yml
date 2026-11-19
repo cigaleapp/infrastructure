@@ -1,0 +1,59 @@
+name: Build issue creator images
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, add-cigale-issue-creator]
+    paths:
+      - .github/workflows/cigale-issue-creator-images.yml
+      - .github/actions/build-push-image/**
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        include:
+          - script: scripts/issue-creator-server.ts
+            service: issue-creator-server
+          - script: scripts/issue-creator-discord-bot.ts
+            service: issue-creator-discord-bot
+
+    name: ${{ matrix.service }}
+
+    steps:
+      - name: Checkout infrastructure repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Build and push image for ${{ matrix.script }}
+        uses: ./.github/actions/build-push-image
+        with:
+          project: cigale
+          service: ${{ matrix.service }}
+          service-account-json: ${{ secrets.HF_SERVICE_ACCOUNT }}
+          repository: cigaleapp/cigale
+          ref: main
+          source: inline
+          dockerfile: Dockerfile.issuescreator
+          dockerfile-content: |
+            FROM oven/bun:latest 
+
+            WORKDIR /app
+
+            COPY patches patches
+            COPY package.json .
+            COPY bun.lock .
+
+            RUN bun pm pkg delete scripts.prepare
+
+            RUN bun install --frozen-lockfile
+
+            COPY src/lib/schemas/issue-creator.js src/lib/schemas/issue-creator.js
+            COPY ${{ matrix.script }} ${{ matrix.script }}
+
+            ENTRYPOINT ["bun", "run", "/app/${{ matrix.script }}"]
