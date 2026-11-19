@@ -60,6 +60,12 @@ variable "cigale_dev_domain" {
   default     = "cigale-dev-biodimedia-data-terra.ai.meso.umontpellier.fr"
 }
 
+variable "cigale_protocol_assets_domain" {
+  description = "Domain for the Cigale protocol assets server, accessible via the Internet"
+  type        = string
+  default     = "cigale-protocol-assets-biodimedia-data-terra.ai.meso.umontpellier.fr"
+}
+
 # ---- cigale-dev -------------------------------------------------------------
 
 variable "cigale_dev_image_repository" {
