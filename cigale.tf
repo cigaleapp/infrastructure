@@ -83,6 +83,16 @@ data "hyperfluid_bucket_credentials" "cigale_beamup_attachments" {
   bucket_name = hyperfluid_bucket.cigale_beamup_attachments.name
 }
 
+resource "hyperfluid_bucket" "cigale_protocol_assets" {
+  env  = local.env
+  name = "cigale-protocol-assets"
+}
+
+data "hyperfluid_bucket_credentials" "cigale_protocol_assets" {
+  env         = local.env
+  bucket_name = hyperfluid_bucket.cigale_protocol_assets.name
+}
+
 # ---------------------------------------------------------------------------
 # cigale-app (client-side app, no env vars)
 # ---------------------------------------------------------------------------
@@ -150,6 +160,81 @@ resource "hyperfluid_container_app" "cigale_dev" {
 		}
 
 		http://${var.cigale_dev_domain} {
+			file_server {
+				fs bucket
+				browse
+			}
+
+			log {
+				output stdout
+			}
+
+			handle_errors {
+				respond "{err.status_code} {err.status_text}"
+			}
+
+			header {
+				Access-Control-Allow-Headers *
+				Access-Control-Allow-Methods *
+				Access-Control-Allow-Origin *
+			}
+
+			@options {
+				method OPTIONS
+			}
+			
+			respond @options 204
+		}
+	EOT
+  }]
+
+  expose_to_internet = true
+  tags               = ["cigale", "developers", "terraform"]
+}
+
+# cigale-protocol-assets
+# Also a caddy static file server, but this one is used in prod, for deploying protocol images
+
+resource "hyperfluid_container_app" "cigale_protocol_assets" {
+   env              = local.env
+  slug             = "cigale-dev"
+  image_repository = var.cigale_dev_image_repository
+  image_tag        = var.cigale_dev_image_tag
+  resource_tier    = var.cigale_dev_tier
+  autoscaling      = var.autoscaling_1_3
+  enabled          = var.apps_enabled
+
+  ports = [
+    { name = "http", port = 80, protocol = "HTTP", primary = true },
+  ]
+
+  env_vars = [
+    { name = "AWS_ACCESS_KEY_ID", value = data.hyperfluid_bucket_credentials.cigale_protocol_assets.access_key },
+    { name = "AWS_SECRET_ACCESS_KEY", value = data.hyperfluid_bucket_credentials.cigale_protocol_assets.secret_key },
+    { name = "AWS_ENDPOINT_URL", value = data.hyperfluid_bucket_credentials.cigale_protocol_assets.endpoint },
+    { name = "AWS_DEFAULT_REGION", value = "default" },
+    { name = "DEPLOYMENT_DOMAIN", value = var.cigale_protocol_assets_domain }
+  ]
+
+  file_mounts = [{
+    mount_path = "/etc/caddy/Caddyfile",
+    content    = <<-EOT
+		{
+			filesystem bucket s3 {
+				bucket ${data.hyperfluid_bucket_credentials.cigale_protocol_assets.bucket_name}
+				region default
+
+				endpoint ${data.hyperfluid_bucket_credentials.cigale_protocol_assets.endpoint}
+				# profile <profile>
+				use_path_style 
+			}
+
+			log default { 
+			   level DEBUG
+			}
+		}
+
+		http://${var.cigale_protocol_assets_domain} {
 			file_server {
 				fs bucket
 				browse
